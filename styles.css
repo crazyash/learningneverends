@@ -1,0 +1,27 @@
+body {
+	background-color: #3fa8ee;
+	margin: 0;
+	padding: 0;
+	
+
+}
+
+.text-box-container{
+	margin: 15% 0 0 0;	
+	text-align: center;
+
+}
+
+.text-box{
+	color: gray;
+	padding: 5px;
+	width: 250px;
+	height: 30px;
+	margin: 10px;
+	font-size: 16px;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	border-radius: 17px;
+	text-align: center;
+	/* outline: none; */
+	border: 2px;  
+}
