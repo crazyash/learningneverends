@@ -6,6 +6,20 @@ body {
 
 }
 
-#header{
-height: 5em;	
-};
+#header{	
+text-align: center;
+color: white;
+font-family: cursive;
+font-size: 2em;
+}
+
+.container{
+	  width: 100%;
+}
+
+.mini-container{
+	width: 70%;
+	margin: auto;
+	text-align: center;
+	/* border: 2px solid white; */
+}
