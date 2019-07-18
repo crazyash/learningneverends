@@ -1,16 +1,27 @@
 body {
-	background-color: #3fa8ee;
+	background-color: #f2f2f2;
 	margin: 0;
-	padding: 0;
-	
+	font-size: 16px;
+}
 
+.main_background{
+	margin: 0;
 }
 
 #header{	
 text-align: center;
 color: white;
-font-family: cursive;
-font-size: 2em;
+background-color: #3fa8ee;
+font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+font-size: 2rem;
+border: 1px solid;
+}
+
+
+
+.heading{
+	padding: 1%;
+	margin: 0;
 }
 
 .container{
@@ -18,8 +29,71 @@ font-size: 2em;
 }
 
 .mini-container{
-	width: 70%;
+	width: 80%;
 	margin: auto;
 	text-align: center;
+	
 	/* border: 2px solid white; */
 }
+
+.app_names{
+	color: #3fa8ee;
+	font-family: cursive;
+	font-size: 1.5rem;
+	font-weight: bold;
+}
+
+.image_box{
+	margin: 2em; 
+	width: 250px;
+	height:250px;
+	display: inline-block;
+	align:center;
+}
+
+.images{
+	border: 2px solid #3fa8ee;
+	width: 200px;
+	height: 200px;
+	border-radius: 100px;
+}
+
+.images:hover{
+	box-shadow: 1px 1px 20px #3fa8ee;
+}
+
+#footer{
+	background-color: #3fa8ee;
+	color: white;
+	text-align: center;  
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-size: 13px;
+	position: fixed;
+	width: 100%;
+	left: 0px;
+	bottom: 0px;
+}
+
+#footer a{
+	color: white;
+}
+
+#comingsoon{
+	/* -webkit-animation-name: example; Safari 4.0 - 8.0 */
+				-webkit-animation-duration: 4s; /* Safari 4.0 - 8.0 */
+				animation-name: example;
+				animation-duration: 4s;
+
+}
+
+  /* Safari 4.0 - 8.0
+  @-webkit-keyframes example {
+	from {position: 0%;}
+	to {position:100%;}
+  }
+   */
+  /* Standard syntax */
+  @keyframes example {
+	from {font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;}
+	to {font-family: fantasy;}
+  }

@@ -1,16 +1,21 @@
 var pages = [
-	["http://ic.learningneverends.in", "C:\\Users\\abd1nti\\Pictures\\INR.jpg"],
-	["http://www.google.com", "https://i.stack.imgur.com/22WR2.png"]
+	["http://ic.learningneverends.in", "C:\\Users\\abd1nti\\Pictures\\INR.jpg", "Investment Calculator"],
+	["http://loan.learningneverends.in", "images/emi.jpg","EMI Calculator"],
+	["http://www.google.com", "images/flames.jpg","Flames"]
 ];
 
 function createDiv(tag){
 	for (let i = 0; i < pages.length; i++) {
 	var divTag = document.createElement("DIV");
+	var text = document.createElement("P");
 	var image = createImage(pages[i][1]);
 	var link = createLink(pages[i][0]);
-	divTag.setAttribute("style", "border: 2px solid white; margin: 10px; width: 250px; height:250px; display: inline-block; align:center;");
+	text.innerHTML=pages[i][2];
+	text.setAttribute("class", "app_names");
+	divTag.setAttribute("class", "image_box");
 	link.appendChild(image);
 	divTag.appendChild(link);
+	divTag.appendChild(text);
 	document.getElementById(tag).appendChild(divTag);
 	}
 }
@@ -19,8 +24,7 @@ function createDiv(tag){
 function createImage(src){
 	  var x = document.createElement("IMG");
 	  x.setAttribute("src", src);
-	  x.setAttribute("width", "250px");
-	  x.setAttribute("height", "250px");
+	  x.setAttribute("class", "images");
 	  x.setAttribute("alt", "Image");
 	  return x;
 }
