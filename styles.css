@@ -69,20 +69,23 @@ border: 1px solid;
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	font-size: 13px;
 	position: fixed;
-	width: 100%;
+	/* width: 100%; */
 	left: 0px;
 	bottom: 0px;
+	right: 0px;
 }
 
 #footer a{
 	color: white;
 }
 
-#comingsoon{
+.comingsoon{
+	/* width: 100px; */
+	position: relative;
 	/* -webkit-animation-name: example; Safari 4.0 - 8.0 */
-				-webkit-animation-duration: 4s; /* Safari 4.0 - 8.0 */
-				animation-name: example;
-				animation-duration: 4s;
+				/* -webkit-animation-duration: 4s; Safari 4.0 - 8.0 */
+				animation:example 4s infinite;
+				animation-timing-function: linear;
 
 }
 
@@ -94,6 +97,6 @@ border: 1px solid;
    */
   /* Standard syntax */
   @keyframes example {
-	from {font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;}
-	to {font-family: fantasy;}
+	from {left: 95%;}
+	to {left: 5%;}
   }
