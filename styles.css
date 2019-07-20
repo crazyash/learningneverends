@@ -11,13 +11,12 @@ body {
 #header{	
 text-align: center;
 color: white;
-background-color: #3fa8ee;
-font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+background-color: #4CAF50;
+font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 font-size: 2rem;
+font-weight: bold;
 border: 1px solid;
 }
-
-
 
 .heading{
 	padding: 1%;
@@ -37,33 +36,32 @@ border: 1px solid;
 }
 
 .app_names{
-	color: #3fa8ee;
+	color: #4CAF50;
 	font-family: cursive;
-	font-size: 1.5rem;
+	font-size: 1.2rem;
 	font-weight: bold;
 }
 
 .image_box{
 	margin: 2em; 
-	width: 250px;
-	height:250px;
+	width: 200px;
+	height:200px;
 	display: inline-block;
-	align:center;
 }
 
 .images{
-	border: 2px solid #3fa8ee;
-	width: 200px;
-	height: 200px;
+	border: 3px solid #4CAF50;
+	width: 150px;
+	height: 150px;
 	border-radius: 100px;
 }
 
-.images:hover{
-	box-shadow: 1px 1px 20px #3fa8ee;
+.images:hover {
+	box-shadow: 1px 1px 20px #4CAF50;
 }
 
 #footer{
-	background-color: #3fa8ee;
+	background-color: #4CAF50;
 	color: white;
 	text-align: center;  
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -79,24 +77,20 @@ border: 1px solid;
 	color: white;
 }
 
-.comingsoon{
-	/* width: 100px; */
+/* .comingsoon{
 	position: relative;
-	/* -webkit-animation-name: example; Safari 4.0 - 8.0 */
-				/* -webkit-animation-duration: 4s; Safari 4.0 - 8.0 */
-				animation:example 4s infinite;
-				animation-timing-function: linear;
-
+	animation:slidefromright 6s;
+	animation-timing-function: linear;
 }
 
-  /* Safari 4.0 - 8.0
-  @-webkit-keyframes example {
-	from {position: 0%;}
-	to {position:100%;}
-  }
-   */
-  /* Standard syntax */
-  @keyframes example {
+@keyframes slidefromright {
 	from {left: 95%;}
-	to {left: 5%;}
-  }
+	to {left: 45%;}
+  } */
+.comingsoon{
+	width: 100%;
+	text-align: center;
+	font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+	font-size: 3em;
+	color: #4CAF50;
+}
