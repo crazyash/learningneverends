@@ -1,3 +1,4 @@
+
 body {
 	background-color: #f2f2f2;
 	margin: 0;
@@ -12,8 +13,8 @@ body {
 text-align: center;
 color: white;
 background-color: #4CAF50;
-font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-font-size: 2rem;
+font-family: Georgia, 'Times New Roman', Times, serif;
+font-size: 3rem;
 font-weight: bold;
 border: 1px solid;
 }
@@ -37,7 +38,7 @@ border: 1px solid;
 
 .app_names{
 	color: #4CAF50;
-	font-family: cursive;
+	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif, Tahoma, Geneva, Verdana, sans-serif;
 	font-size: 1.2rem;
 	font-weight: bold;
 }
@@ -50,13 +51,28 @@ border: 1px solid;
 }
 
 .images{
-	border: 3px solid #4CAF50;
 	width: 150px;
 	height: 150px;
 	border-radius: 100px;
 }
 
-.images:hover {
+#image_box0 .images{
+	border: 3px solid #4CAF50;
+}
+#image_box1 .images{
+	border: 3px solid #4CAF50;
+}
+#image_box2 .images{
+	border: 3px solid #4CAF50;
+}
+
+#image_box0 .images:hover {
+	box-shadow: 1px 1px 20px #4CAF50;
+}
+#image_box1 .images:hover {
+	box-shadow: 1px 1px 20px #4CAF50;
+}
+#image_box2 .images:hover {
 	box-shadow: 1px 1px 20px #4CAF50;
 }
 

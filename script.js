@@ -13,6 +13,7 @@ function createDiv(tag){
 	text.innerHTML=pages[i][2];
 	text.setAttribute("class", "app_names");
 	divTag.setAttribute("class", "image_box");
+	divTag.setAttribute("id", "image_box"+i);
 	link.appendChild(image);
 	divTag.appendChild(link);
 	divTag.appendChild(text);
