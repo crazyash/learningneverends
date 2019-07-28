@@ -63,7 +63,7 @@ border: 0px solid;
 	border: 3px solid #EE1D0A;
 }
 #image_box2 .images{
-	border: 3px solid #dacc14;
+	border: 3px solid #d8970c;
 }
 
 #image_box0 .images:hover {
@@ -73,7 +73,7 @@ border: 0px solid;
 	box-shadow: 1px 1px 20px #EE1D0A;
 }
 #image_box2 .images:hover {
-	box-shadow: 1px 1px 20px #dacc14;
+	box-shadow: 1px 1px 20px #d8970c;
 }
 
 #image_box0 .app_names{
@@ -83,7 +83,7 @@ border: 0px solid;
 	color: #EE1D0A;
 }
 #image_box2 .app_names{
-	color: #dacc14;
+	color: #d8970c;
 }
 
 #footer{
