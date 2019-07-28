@@ -1,7 +1,7 @@
 var pages = [
 	["http://ic.learningneverends.in", "images/inr.jpg", "Investment Calculator"],
 	["http://loan.learningneverends.in", "images/emi.jpg","EMI Calculator"],
-	["comingsoon.html", "images/flames.jpg","Flames"]
+	["http://flames.learningneverends.in", "images/flames.jpg","Flames"]
 ];
 
 function createDiv(tag){
