@@ -1,0 +1,17 @@
+{
+  "name": "article-website",
+  "version": "1.0.0",
+  "description": "A static article website generator",
+  "main": "build.js",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "npm run build && echo 'Build complete! Open public/index.html in your browser'"
+  },
+  "keywords": ["blog", "markdown", "static-site-generator"],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "marked": "^11.1.1",
+    "gray-matter": "^4.0.3"
+  }
+}

@@ -204,7 +204,14 @@
     </section>
 
     <script>
-        const articles = [];
+        const articles = [
+  {
+    "title": "My First Post",
+    "slug": "first-post",
+    "date": "2026-02-11T00:00:00.000Z",
+    "excerpt": "This is my first article using the markdown generator"
+  }
+];
 
         const themeToggle = document.getElementById('themeToggle');
         let isDark = localStorage.getItem('theme') === 'dark';
