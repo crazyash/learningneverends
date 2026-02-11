@@ -210,6 +210,12 @@
     "slug": "first-post",
     "date": "2026-02-11T00:00:00.000Z",
     "excerpt": "This is my first article using the markdown generator"
+  },
+  {
+    "title": "My First Post",
+    "slug": "second-post",
+    "date": "2026-02-10T00:00:00.000Z",
+    "excerpt": "This is my first article using the markdown generator"
   }
 ];
 
@@ -247,7 +253,14 @@
                 container.innerHTML = '<div class="no-articles">No articles yet. Add .md files to articles/ and run <code>npm run build</code></div>';
                 return;
             }
-            container.innerHTML = articles.map(article => `
+
+            // ✅ CLIENT-SIDE SORT BACKUP: newest first
+            const sortedArticles = articles
+                .map(article => ({ ...article, dateObj: new Date(article.date) }))
+                .sort((a, b) => b.dateObj - a.dateObj)
+                .map(({ dateObj, ...article }) => article);
+
+            container.innerHTML = sortedArticles.map(article => `
                 <article class="article-card">
                     <div class="article-date">${formatDate(article.date)}</div>
                     <h2 class="article-title">

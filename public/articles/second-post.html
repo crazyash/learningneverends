@@ -1,22 +1,9 @@
-const fs = require('fs');
-const path = require('path');
-const { marked } = require('marked');
-const matter = require('gray-matter');
-
-const ARTICLES_DIR = path.join(__dirname, 'articles');
-const PUBLIC_DIR = path.join(__dirname, 'public');
-const ARTICLES_PUBLIC_DIR = path.join(PUBLIC_DIR, 'articles');
-
-if (!fs.existsSync(PUBLIC_DIR)) fs.mkdirSync(PUBLIC_DIR, { recursive: true });
-if (!fs.existsSync(ARTICLES_PUBLIC_DIR)) fs.mkdirSync(ARTICLES_PUBLIC_DIR, { recursive: true });
-
-function getArticleTemplate(title, date, content, slug) {
-    return `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title}</title>
+    <title>My First Post</title>
     <style>
         :root {
             --bg: #ffffff;
@@ -134,8 +121,8 @@ function getArticleTemplate(title, date, content, slug) {
     
     <header class="header">
         <div class="container">
-            <h1>${title}</h1>
-            <div class="article-meta">${new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+            <h1>My First Post</h1>
+            <div class="article-meta">February 10, 2026</div>
         </div>
     </header>
 
@@ -143,7 +130,19 @@ function getArticleTemplate(title, date, content, slug) {
         <div class="container">
             <a href="../index.html" class="back-link">← Back to articles</a>
             <article class="article-content">
-                ${content}
+                <h1>Welcome to My Blog</h1>
+<p>This is my first article written in <strong>markdown</strong>.</p>
+<h2>Features</h2>
+<ul>
+<li>Write in markdown</li>
+<li>Automatically builds HTML</li>
+<li>Push to GitHub</li>
+</ul>
+<h3>Code Example</h3>
+<pre><code class="language-javascript">console.log(&#39;Hello, World!&#39;);
+</code></pre>
+<p>That&#39;s it! The build script handles the rest.</p>
+
             </article>
         </div>
     </main>
@@ -161,86 +160,4 @@ function getArticleTemplate(title, date, content, slug) {
         setTheme(saved === 'dark' || (!saved && prefersDark));
     </script>
 </body>
-</html>`;
-}
-
-function getMarkdownFiles() {
-    if (!fs.existsSync(ARTICLES_DIR)) {
-        fs.mkdirSync(ARTICLES_DIR, { recursive: true });
-        return [];
-    }
-    return fs.readdirSync(ARTICLES_DIR)
-        .filter(f => f.endsWith('.md'));
-}
-
-function parseArticle(filename) {
-    const filepath = path.join(ARTICLES_DIR, filename);
-    const content = fs.readFileSync(filepath, 'utf-8');
-    const { data, content: markdown } = matter(content);
-    return {
-        filename,
-        slug: filename.replace('.md', ''),
-        title: data.title || filename.replace('.md', ''),
-        date: data.date || new Date().toISOString().split('T')[0],
-        excerpt: data.excerpt || markdown.substring(0, 150).replace(/[#*_]/g, '') + '...',
-        content: markdown,
-        tags: data.tags || []
-    };
-}
-
-async function buildArticles() {
-    const files = getMarkdownFiles();
-    let articles = [];
-    
-    console.log('Building articles...');
-    for (const file of files) {
-        const article = parseArticle(file);
-        const htmlContent = marked(article.content);
-        const html = getArticleTemplate(article.title, article.date, htmlContent, article.slug);
-        fs.writeFileSync(path.join(ARTICLES_PUBLIC_DIR, `${article.slug}.html`), html);
-        articles.push({ 
-            title: article.title, 
-            slug: article.slug, 
-            date: article.date, 
-            excerpt: article.excerpt 
-        });
-        console.log(`  ${article.title} (${article.date})`);
-    }
-    
-    // ✅ SORT BY DATE: newest first
-    articles.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    return articles;
-}
-
-function updateIndex(articles) {
-    const indexPath = path.join(PUBLIC_DIR, 'index.html');
-    const indexContent = fs.readFileSync(indexPath, 'utf-8');
-    const articlesJson = JSON.stringify(articles, null, 2);
-    const updatedContent = indexContent.replace(/const articles = \[[\s\S]*?\];/, `const articles = ${articlesJson};`);
-    fs.writeFileSync(indexPath, updatedContent);
-}
-
-function setupIndexPage() {
-    const templatePath = path.join(__dirname, 'index.html');
-    if (fs.existsSync(templatePath)) {
-        fs.writeFileSync(path.join(PUBLIC_DIR, 'index.html'), fs.readFileSync(templatePath, 'utf-8'));
-    }
-}
-
-async function build() {
-    console.log('Kent C. Dodds-style blog build...\n');
-    try {
-        setupIndexPage();
-        const articles = await buildArticles();
-        updateIndex(articles);
-        console.log('\nBuild complete!');
-        console.log(`${articles.length} articles (sorted newest first)`);
-        console.log('Open public/index.html');
-    } catch (error) {
-        console.error('Build failed:', error);
-        process.exit(1);
-    }
-}
-
-build();
+</html>
