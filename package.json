@@ -7,11 +7,17 @@
     "build": "node build.js",
     "dev": "npm run build && echo 'Build complete! Open public/index.html in your browser'"
   },
-  "keywords": ["blog", "markdown", "static-site-generator"],
+  "keywords": [
+    "blog",
+    "markdown",
+    "static-site-generator"
+  ],
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
+    "gray-matter": "^4.0.3",
     "marked": "^11.1.1",
-    "gray-matter": "^4.0.3"
+    "node-plantuml": "^0.9.0",
+    "plantuml-encoder": "^1.4.0"
   }
 }
