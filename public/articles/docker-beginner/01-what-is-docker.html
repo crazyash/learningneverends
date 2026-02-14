@@ -90,6 +90,66 @@
             transform: translateY(-1px);
             box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
         }
+
+        /* Footer Styles */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 0.75rem 0;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .footer a:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+
+        /* Better hyperlink visibility in dark mode */
+        [data-theme="dark"] .footer a {
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] .footer a:hover {
+            color: #93c5fd;
+        }
+
+        /* Add bottom padding to body to account for fixed footer */
+        body {
+            padding-bottom: 3rem;
+        }
+
+        /* General hyperlink improvements for better visibility */
+        a {
+            color: var(--primary);
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--primary-light);
+        }
+
+        [data-theme="dark"] a {
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] a:hover {
+            color: #93c5fd;
+        }
     
         
         .article-content {
@@ -480,6 +540,12 @@
             
         </nav>
     
+
+    <footer class="footer">
+        <div class="container">
+            For feedback or suggestions, send a mail to <a href="mailto:crazyash@live.in">crazyash@live.in</a>
+        </div>
+    </footer>
 
     <script>
         
