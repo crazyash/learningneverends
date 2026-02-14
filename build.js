@@ -130,25 +130,48 @@ function getSharedStyles() {
     `;
 }
 
-function getNavigationComponent(navigation) {
+function getNavigationComponent(navigation, currentFolder = '') {
     if (!navigation || (!navigation.prev && !navigation.next)) return '';
     
     return `
         <nav class="article-navigation">
             ${navigation.prev ? `
-            <a href="${navigation.prev.slug}.html" class="nav-link prev">
+            <a href="${getRelativeArticlePath(navigation.prev.slug, currentFolder)}" class="nav-link prev">
                 <div class="nav-label">← Previous</div>
                 <div class="nav-title">${navigation.prev.title}</div>
             </a>
             ` : '<div></div>'}
             ${navigation.next ? `
-            <a href="${navigation.next.slug}.html" class="nav-link next">
+            <a href="${getRelativeArticlePath(navigation.next.slug, currentFolder)}" class="nav-link next">
                 <div class="nav-label">Next →</div>
                 <div class="nav-title">${navigation.next.title}</div>
             </a>
             ` : '<div></div>'}
         </nav>
     `;
+}
+
+function getRelativeArticlePath(targetSlug, currentFolder) {
+    const targetParts = targetSlug.split('/');
+    const currentParts = currentFolder ? currentFolder.split('/') : [];
+    
+    // If both are in the same folder, just use the filename
+    if (targetParts.length > 1 && currentParts.length > 0 && targetParts[0] === currentParts[0]) {
+        return `${targetParts[targetParts.length - 1]}.html`;
+    }
+    
+    // If target is in a subfolder and current is in root
+    if (targetParts.length > 1 && currentParts.length === 0) {
+        return `${targetSlug}.html`;
+    }
+    
+    // If current is in subfolder and target is in root
+    if (targetParts.length === 1 && currentParts.length > 0) {
+        return `../${targetSlug}.html`;
+    }
+    
+    // Default case
+    return `${targetSlug}.html`;
 }
 
 function getThemeScript() {
@@ -166,7 +189,7 @@ function getThemeScript() {
     `;
 }
 
-function getArticleTemplate(title, date, content, slug, navigation = null) {
+function getArticleTemplate(title, date, content, slug, navigation = null, relativePath = '') {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -405,12 +428,12 @@ function getArticleTemplate(title, date, content, slug, navigation = null) {
     <header class="header">
         <div class="container">
             <h1 class="hero-title">
-                <a href="../index.html">Learning Never Ends</a>
+                <a href="${relativePath}../index.html">Learning Never Ends</a>
             </h1>
         </div>
     </header>
 
-    ${getNavigationComponent(navigation)}
+    ${getNavigationComponent(navigation, slug.includes('/') ? slug.split('/')[0] : '')}
 
     <main class="article-content">
         <article class="article-post">
@@ -418,7 +441,7 @@ function getArticleTemplate(title, date, content, slug, navigation = null) {
         </article>
     </main>
 
-    ${getNavigationComponent(navigation)}
+    ${getNavigationComponent(navigation, slug.includes('/') ? slug.split('/')[0] : '')}
 
     <script>
         ${getThemeScript()}
@@ -432,23 +455,58 @@ function getMarkdownFiles() {
         fs.mkdirSync(ARTICLES_DIR, { recursive: true });
         return [];
     }
-    return fs.readdirSync(ARTICLES_DIR)
-        .filter(f => f.endsWith('.md'));
+    
+    const files = [];
+    
+    function scanDirectory(dir, relativePath = '') {
+        const items = fs.readdirSync(dir);
+        
+        for (const item of items) {
+            const fullPath = path.join(dir, item);
+            const itemRelativePath = relativePath ? path.join(relativePath, item) : item;
+            
+            if (fs.statSync(fullPath).isDirectory()) {
+                // Recursively scan subdirectories
+                scanDirectory(fullPath, itemRelativePath);
+            } else if (item.endsWith('.md')) {
+                files.push(itemRelativePath);
+            }
+        }
+    }
+    
+    scanDirectory(ARTICLES_DIR);
+    return files;
 }
 
 function parseArticle(filename) {
     const filepath = path.join(ARTICLES_DIR, filename);
     const content = fs.readFileSync(filepath, 'utf-8');
     const { data, content: markdown } = matter(content);
+    
+    // Extract folder and base filename
+    const parsedPath = path.parse(filename);
+    const folder = parsedPath.dir;
+    const baseName = parsedPath.name;
+    const slug = folder ? `${folder}/${baseName}` : baseName;
+    
     return {
         filename,
-        slug: filename.replace('.md', ''),
-        title: data.title || filename.replace('.md', ''),
+        slug,
+        folder,
+        baseName,
+        title: data.title || baseName.replace(/^\d+-/, '').replace(/-/g, ' '),
         date: data.date || new Date().toISOString().split('T')[0],
         excerpt: data.excerpt || markdown.substring(0, 150).replace(/[#*_]/g, '') + '...',
         content: markdown,
-        tags: data.tags || []
+        tags: data.tags || [],
+        // Add numerical order for sorting
+        order: extractOrder(baseName)
     };
+}
+
+function extractOrder(filename) {
+    const match = filename.match(/^(\d+)-/);
+    return match ? parseInt(match[1], 10) : 999999; // Put non-numbered articles at the end
 }
 
 async function buildArticles() {
@@ -457,42 +515,106 @@ async function buildArticles() {
     
     console.log('Building articles...');
     
-    // First pass: parse all articles and sort them
+    // First pass: parse all articles
     for (const file of files) {
         const article = parseArticle(file);
         articles.push({ 
             title: article.title, 
-            slug: article.slug, 
+            slug: article.slug,
+            folder: article.folder,
+            baseName: article.baseName,
             date: article.date, 
             excerpt: article.excerpt,
-            content: article.content
+            content: article.content,
+            order: article.order
         });
     }
     
-    // ✅ SORT BY DATE: newest first
-    articles.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Sort articles: first by folder (docker-beginner first), then by order number, then by date
+    articles.sort((a, b) => {
+        // Group docker-beginner articles first
+        if (a.folder === 'docker-beginner' && b.folder !== 'docker-beginner') return -1;
+        if (a.folder !== 'docker-beginner' && b.folder === 'docker-beginner') return 1;
+        
+        // Within the same folder, sort by order number
+        if (a.folder === b.folder) {
+            if (a.order !== b.order) {
+                return a.order - b.order;
+            }
+            // If same order, sort by date (newest first)
+            return new Date(b.date) - new Date(a.date);
+        }
+        
+        // Different folders (non-docker), sort by date
+        return new Date(b.date) - new Date(a.date);
+    });
     
     // Second pass: generate HTML with navigation
     for (let i = 0; i < articles.length; i++) {
         const article = articles[i];
+        
+        // Create the output directory if it doesn't exist
+        const outputDir = article.folder ? 
+            path.join(ARTICLES_PUBLIC_DIR, article.folder) : 
+            ARTICLES_PUBLIC_DIR;
+        
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });
+        }
         
         // Add title and date to the beginning of the content
         const contentWithHeader = `# ${article.title}\n\n*${new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}*\n\n${article.content.replace(/^#\s+.*$/m, '').trim()}`;
         const htmlContent = marked(contentWithHeader);
         
         // Determine navigation
-        const navigation = {
-            prev: i < articles.length - 1 ? articles[i + 1] : null, // Previous (older)
-            next: i > 0 ? articles[i - 1] : null // Next (newer)
-        };
+        let navigation = null;
+        if (article.folder === 'docker-beginner') {
+            // For docker articles, navigate within the same folder sequence, but allow global navigation at boundaries
+            const dockerArticles = articles.filter(a => a.folder === 'docker-beginner');
+            const dockerIndex = dockerArticles.findIndex(a => a.slug === article.slug);
+            
+            let prev = null;
+            let next = null;
+            
+            // Previous navigation
+            if (dockerIndex > 0) {
+                // Previous Docker article
+                prev = dockerArticles[dockerIndex - 1];
+            } else {
+                // First Docker article - no previous (could link to global previous if desired)
+                prev = null;
+            }
+            
+            // Next navigation
+            if (dockerIndex < dockerArticles.length - 1) {
+                // Next Docker article
+                next = dockerArticles[dockerIndex + 1];
+            } else {
+                // Last Docker article - link to next global article
+                const globalIndex = articles.findIndex(a => a.slug === article.slug);
+                next = globalIndex < articles.length - 1 ? articles[globalIndex + 1] : null;
+            }
+            
+            navigation = { prev, next };
+        } else {
+            // For other articles, navigate globally in sequence order
+            navigation = {
+                prev: i > 0 ? articles[i - 1] : null, // Previous in sequence
+                next: i < articles.length - 1 ? articles[i + 1] : null // Next in sequence
+            };
+        }
         
-        const html = getArticleTemplate(article.title, article.date, htmlContent, article.slug, navigation);
-        fs.writeFileSync(path.join(ARTICLES_PUBLIC_DIR, `${article.slug}.html`), html);
-        console.log(`  ${article.title} (${article.date})`);
+        // Calculate relative path to index.html
+        const relativePath = article.folder ? '../' : '';
+        const html = getArticleTemplate(article.title, article.date, htmlContent, article.slug, navigation, relativePath);
+        
+        const outputFile = path.join(outputDir, `${article.baseName}.html`);
+        fs.writeFileSync(outputFile, html);
+        console.log(`  ${article.title} (${article.date}) -> ${article.slug}`);
     }
     
     // Return articles without content for index page
-    return articles.map(({ title, slug, date, excerpt }) => ({ title, slug, date, excerpt }));
+    return articles.map(({ title, slug, date, excerpt, folder }) => ({ title, slug, date, excerpt, folder }));
 }
 
 function updateIndex(articles) {

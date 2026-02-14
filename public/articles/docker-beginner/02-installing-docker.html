@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My First Post - Learning Never Ends</title>
+    <title>Installing Docker - Learning Never Ends</title>
     <style>
         
         :root {
@@ -321,7 +321,7 @@
     <header class="header">
         <div class="container">
             <h1 class="hero-title">
-                <a href="../index.html">Learning Never Ends</a>
+                <a href="../../index.html">Learning Never Ends</a>
             </h1>
         </div>
     </header>
@@ -329,15 +329,15 @@
     
         <nav class="article-navigation">
             
-            <a href="plantuml-test.html" class="nav-link prev">
+            <a href="01-what-is-docker.html" class="nav-link prev">
                 <div class="nav-label">← Previous</div>
-                <div class="nav-title">Testing PlantUML Diagrams</div>
+                <div class="nav-title">What is Docker?</div>
             </a>
             
             
-            <a href="second-post.html" class="nav-link next">
+            <a href="03-images-and-containers.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">My First Post</div>
+                <div class="nav-title">Docker Images and Containers</div>
             </a>
             
         </nav>
@@ -345,19 +345,29 @@
 
     <main class="article-content">
         <article class="article-post">
-            <h1>My First Post</h1>
-<p><em>February 11, 2026</em></p>
-<p>This is my first article written in <strong>markdown</strong>.</p>
-<h2>Features</h2>
-<ul>
-<li>Write in markdown</li>
-<li>Automatically builds HTML</li>
-<li>Push to GitHub</li>
-</ul>
-<h3>Code Example</h3>
-<pre><code class="language-javascript">console.log(&#39;Hello, World!&#39;);
+            <h1>Installing Docker</h1>
+<p><em>February 14, 2026</em></p>
+<p>Docker can be installed easily.</p>
+<h2>Mac / Windows</h2>
+<ol>
+<li>Download Docker Desktop</li>
+<li>Install and start it</li>
+<li>Verify:</li>
+</ol>
+<pre><code class="language-bash">docker --version
 </code></pre>
-<p>That&#39;s it! The build script handles the rest.</p>
+<h2>Ubuntu Linux</h2>
+<pre><code class="language-bash">sudo apt update
+sudo apt install docker.io
+sudo systemctl start docker
+docker run hello-world
+</code></pre>
+<p>If you see a success message, Docker is working.</p>
+<hr>
+<h2>References</h2>
+<ul>
+<li><a href="https://docs.docker.com/desktop/">https://docs.docker.com/desktop/</a></li>
+</ul>
 
         </article>
     </main>
@@ -365,15 +375,15 @@
     
         <nav class="article-navigation">
             
-            <a href="plantuml-test.html" class="nav-link prev">
+            <a href="01-what-is-docker.html" class="nav-link prev">
                 <div class="nav-label">← Previous</div>
-                <div class="nav-title">Testing PlantUML Diagrams</div>
+                <div class="nav-title">What is Docker?</div>
             </a>
             
             
-            <a href="second-post.html" class="nav-link next">
+            <a href="03-images-and-containers.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">My First Post</div>
+                <div class="nav-title">Docker Images and Containers</div>
             </a>
             
         </nav>

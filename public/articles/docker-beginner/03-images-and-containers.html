@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My First Post - Learning Never Ends</title>
+    <title>Docker Images and Containers - Learning Never Ends</title>
     <style>
         
         :root {
@@ -321,7 +321,7 @@
     <header class="header">
         <div class="container">
             <h1 class="hero-title">
-                <a href="../index.html">Learning Never Ends</a>
+                <a href="../../index.html">Learning Never Ends</a>
             </h1>
         </div>
     </header>
@@ -329,15 +329,15 @@
     
         <nav class="article-navigation">
             
-            <a href="plantuml-test.html" class="nav-link prev">
+            <a href="02-installing-docker.html" class="nav-link prev">
                 <div class="nav-label">← Previous</div>
-                <div class="nav-title">Testing PlantUML Diagrams</div>
+                <div class="nav-title">Installing Docker</div>
             </a>
             
             
-            <a href="second-post.html" class="nav-link next">
+            <a href="04-docker-topic-4.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">My First Post</div>
+                <div class="nav-title">Docker Topic 4</div>
             </a>
             
         </nav>
@@ -345,19 +345,25 @@
 
     <main class="article-content">
         <article class="article-post">
-            <h1>My First Post</h1>
-<p><em>February 11, 2026</em></p>
-<p>This is my first article written in <strong>markdown</strong>.</p>
-<h2>Features</h2>
-<ul>
-<li>Write in markdown</li>
-<li>Automatically builds HTML</li>
-<li>Push to GitHub</li>
-</ul>
-<h3>Code Example</h3>
-<pre><code class="language-javascript">console.log(&#39;Hello, World!&#39;);
+            <h1>Docker Images and Containers</h1>
+<p><em>February 14, 2026</em></p>
+<h2>Image</h2>
+<p>An image is a blueprint. It contains instructions to create a container.</p>
+<p>Example:</p>
+<pre><code class="language-bash">docker pull nginx
 </code></pre>
-<p>That&#39;s it! The build script handles the rest.</p>
+<h2>Container</h2>
+<p>A container is a running instance of an image.</p>
+<pre><code class="language-bash">docker run nginx
+</code></pre>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/SoWkIImgAStDuIfAJIv9p4lFILLGSibFpaujKl3CJKnFLKAMSCxFAqdCp4ijKZ348Mwan8MgNK5NrmvD8tu5HafS3gbvAQMvEG00" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><p>One image can create multiple containers.</p>
+<hr>
+<h2>References</h2>
+<ul>
+<li><a href="https://docs.docker.com/get-started/">https://docs.docker.com/get-started/</a></li>
+</ul>
 
         </article>
     </main>
@@ -365,15 +371,15 @@
     
         <nav class="article-navigation">
             
-            <a href="plantuml-test.html" class="nav-link prev">
+            <a href="02-installing-docker.html" class="nav-link prev">
                 <div class="nav-label">← Previous</div>
-                <div class="nav-title">Testing PlantUML Diagrams</div>
+                <div class="nav-title">Installing Docker</div>
             </a>
             
             
-            <a href="second-post.html" class="nav-link next">
+            <a href="04-docker-topic-4.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">My First Post</div>
+                <div class="nav-title">Docker Topic 4</div>
             </a>
             
         </nav>
