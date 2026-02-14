@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My First Post - Learning Never Ends</title>
+    <title>Running Your First Web Server - Learning Never Ends</title>
     <style>
         
         :root {
@@ -48,7 +48,7 @@
         }
 
         .header {
-            padding: 2.8rem 0 1.4rem 0;
+            padding: 1.96rem 0 0.98rem 0;
             text-align: center;
             border-bottom: 1px solid var(--border);
         }
@@ -125,7 +125,43 @@
             font-size: 0.9rem;
             font-weight: 500;
             display: block;
+            margin-bottom: 1rem;
+        }
+
+        .article-excerpt-display {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
             margin-bottom: 2rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
         }
 
         .article-post h1, .article-post h2 { 
@@ -267,7 +303,7 @@
             }
             
             .header {
-                padding: 1.5rem 0 1rem 0;
+                padding: 1.05rem 0 0.7rem 0;
             }
             
             .hero-title {
@@ -321,7 +357,7 @@
     <header class="header">
         <div class="container">
             <h1 class="hero-title">
-                <a href="../index.html">Learning Never Ends</a>
+                <a href="../../index.html">Learning Never Ends</a>
             </h1>
         </div>
     </header>
@@ -329,15 +365,15 @@
     
         <nav class="article-navigation">
             
-            <a href="plantuml-test.html" class="nav-link prev">
+            <a href="03-docker-images-and-containers.html" class="nav-link prev">
                 <div class="nav-label">← Previous</div>
-                <div class="nav-title">Testing PlantUML Diagrams</div>
+                <div class="nav-title">Docker Images and Containers Explained</div>
             </a>
             
             
-            <a href="second-post.html" class="nav-link next">
+            <a href="05-building-images-with-dockerfile.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">My First Post</div>
+                <div class="nav-title">Building Images with Dockerfile</div>
             </a>
             
         </nav>
@@ -345,19 +381,188 @@
 
     <main class="article-content">
         <article class="article-post">
-            <h1>My First Post</h1>
-<p><em>February 11, 2026</em></p>
-<p>This is my first article written in <strong>markdown</strong>.</p>
-<h2>Features</h2>
-<ul>
-<li>Write in markdown</li>
-<li>Automatically builds HTML</li>
-<li>Push to GitHub</li>
-</ul>
-<h3>Code Example</h3>
-<pre><code class="language-javascript">console.log(&#39;Hello, World!&#39;);
+            <h1>Running Your First Web Server</h1>
+<p><em>February 14, 2026</em></p>
+<div class="article-excerpt-display"><em>Deploy and customize your first NGINX web server with Docker, including port mapping and custom content.</em></div>
+
+<div class="article-tags"><span class="tag">#docker</span><span class="tag">#nginx</span><span class="tag">#web-server</span><span class="tag">#deployment</span></div>
+
+<p>Ready to deploy your first web server with Docker? Let&#39;s use NGINX, a popular web server, to see Docker in action!</p>
+<h2>What is NGINX?</h2>
+<p><strong>NGINX</strong> is a high-performance web server and reverse proxy server. It&#39;s perfect for serving static websites, APIs, and handling high traffic loads.</p>
+<h2>Step 1: Pull the NGINX Image</h2>
+<p>First, let&#39;s download the official NGINX image from Docker Hub:</p>
+<pre><code class="language-bash"># Pull the latest NGINX image
+docker pull nginx:latest
+
+# Verify the image was downloaded
+docker images | grep nginx
 </code></pre>
-<p>That&#39;s it! The build script handles the rest.</p>
+<h2>Step 2: Run Your First Web Server</h2>
+<p>Now let&#39;s start a web server container:</p>
+<pre><code class="language-bash"># Run NGINX in detached mode with port mapping
+docker run -d -p 8080:80 --name my-first-webserver nginx:latest
+
+# Check if the container is running
+docker ps
+</code></pre>
+<p><strong>Command breakdown:</strong></p>
+<ul>
+<li><code>docker run</code> - Creates and starts a new container</li>
+<li><code>-d</code> - Runs in detached mode (background)</li>
+<li><code>-p 8080:80</code> - Maps port 8080 on your machine to port 80 in container</li>
+<li><code>--name my-first-webserver</code> - Gives the container a friendly name</li>
+<li><code>nginx:latest</code> - The image to use</li>
+</ul>
+<h2>Step 3: Test Your Web Server</h2>
+<p>Open your web browser and visit: <strong><a href="http://localhost:8080">http://localhost:8080</a></strong></p>
+<p>You should see the NGINX welcome page!</p>
+<pre><code class="language-bash"># You can also test with curl
+curl http://localhost:8080
+</code></pre>
+<h2>Understanding Port Mapping</h2>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/ROynJyCm48Lt_ueZ4moLCaOPK4KeY84AmG9I5zSvfL6TEtC-KoJ4VqTn4gaWLh_llU-yZcf5q-3DXHvmGDZxX45wKgEzUeGd5eL76q9F7JHC3eCQ4wmxsWwXUECaqF0Gag8Ky6K019rQwZn2SIDyYYWxklJih3zmrBegg_Ag01jXFwM_AxViZYYmeQudp5YRNyptcNM66YQrFVqZtju_R5_X1UKZs_Cd5ksu_3dEpNvOhQvd2TJmZEy9euBoZi9KgqepnoEPwr337Sl9IXipwPPBOEwO2Vip7GDJnFErvOOnrIGKGHPgZTIcmVy0" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><p><strong>Why port mapping?</strong></p>
+<ul>
+<li>Containers have their own network</li>
+<li>Port 80 inside container ≠ Port 80 on your machine</li>
+<li><code>-p 8080:80</code> creates a bridge between them</li>
+</ul>
+<h2>Step 4: Serve Custom Content</h2>
+<p>Let&#39;s replace the default NGINX page with your own content:</p>
+<h3>Method 1: Volume Mounting</h3>
+<pre><code class="language-bash"># Create a custom HTML file
+mkdir ~/my-website
+echo &quot;&lt;h1&gt;Hello from Docker!&lt;/h1&gt;&lt;p&gt;My first containerized website&lt;/p&gt;&quot; &gt; ~/my-website/index.html
+
+# Stop the current container
+docker stop my-first-webserver
+docker rm my-first-webserver
+
+# Run with volume mount
+docker run -d -p 8080:80 --name custom-webserver \
+  -v ~/my-website:/usr/share/nginx/html \
+  nginx:latest
+</code></pre>
+<h3>Method 2: Copy Files to Running Container</h3>
+<pre><code class="language-bash"># Create custom content
+echo &quot;&lt;h1&gt;Updated Content!&lt;/h1&gt;&quot; &gt; ~/index.html
+
+# Copy file into running container
+docker cp ~/index.html custom-webserver:/usr/share/nginx/html/index.html
+
+# Refresh your browser to see changes
+</code></pre>
+<h2>Step 5: Container Management</h2>
+<p>Essential commands for managing your web server:</p>
+<pre><code class="language-bash"># View container logs
+docker logs my-first-webserver
+
+# Follow logs in real-time
+docker logs -f my-first-webserver
+
+# Execute commands inside the container
+docker exec -it my-first-webserver bash
+
+# Stop the web server
+docker stop my-first-webserver
+
+# Start it again
+docker start my-first-webserver
+
+# Remove the container completely
+docker rm my-first-webserver
+</code></pre>
+<h2>Multiple Web Servers</h2>
+<p>You can run multiple web servers on different ports:</p>
+<pre><code class="language-bash"># Run multiple NGINX servers
+docker run -d -p 8080:80 --name web1 nginx:latest
+docker run -d -p 8081:80 --name web2 nginx:latest
+docker run -d -p 8082:80 --name web3 nginx:latest
+
+# Now you have 3 web servers:
+# http://localhost:8080
+# http://localhost:8081  
+# http://localhost:8082
+</code></pre>
+<h2>Environment Variables</h2>
+<p>NGINX containers can be configured with environment variables:</p>
+<pre><code class="language-bash"># Run with custom configuration
+docker run -d -p 8080:80 \
+  --name configured-nginx \
+  -e NGINX_HOST=mysite.local \
+  -e NGINX_PORT=80 \
+  nginx:latest
+</code></pre>
+<h2>Troubleshooting Common Issues</h2>
+<h3>Port Already in Use</h3>
+<pre><code class="language-bash"># Error: port 8080 is already allocated
+# Solution: Use a different port
+docker run -d -p 8090:80 nginx:latest
+
+# Or find and stop the conflicting container
+docker ps
+docker stop &lt;container-name&gt;
+</code></pre>
+<h3>Container Won&#39;t Start</h3>
+<pre><code class="language-bash"># Check container logs for errors
+docker logs &lt;container-name&gt;
+
+# Check if the image exists
+docker images | grep nginx
+</code></pre>
+<h3>Cannot Access Website</h3>
+<pre><code class="language-bash"># Verify container is running
+docker ps
+
+# Check port mapping is correct
+docker port &lt;container-name&gt;
+
+# Test with curl
+curl http://localhost:8080
+</code></pre>
+<h2>Performance Monitoring</h2>
+<p>Monitor your web server&#39;s performance:</p>
+<pre><code class="language-bash"># View resource usage
+docker stats my-first-webserver
+
+# View detailed container information
+docker inspect my-first-webserver
+
+# Check container processes
+docker exec my-first-webserver ps aux
+</code></pre>
+<h2>Security Best Practices</h2>
+<p><strong>For production deployments:</strong></p>
+<pre><code class="language-bash"># Run as non-root user
+docker run -d -p 8080:80 --user nginx nginx:latest
+
+# Limit resources
+docker run -d -p 8080:80 \
+  --memory=&quot;256m&quot; \
+  --cpus=&quot;0.5&quot; \
+  nginx:latest
+
+# Use read-only filesystem
+docker run -d -p 8080:80 --read-only nginx:latest
+</code></pre>
+<h2>What&#39;s Next?</h2>
+<p><strong>Congratulations!</strong> You&#39;ve successfully:</p>
+<ul>
+<li>Deployed your first web server with Docker</li>
+<li>Understood port mapping</li>
+<li>Served custom content</li>
+<li>Learned container management basics</li>
+</ul>
+<p>In the next article, we&#39;ll learn how to build custom Docker images using Dockerfile!</p>
+<hr>
+<h2>References</h2>
+<ul>
+<li><a href="https://hub.docker.com/_/nginx">NGINX Docker Hub</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/run/">Docker Run Command Reference</a></li>
+<li><a href="https://docs.docker.com/config/containers/container-networking/">Docker Port Mapping Guide</a></li>
+</ul>
 
         </article>
     </main>
@@ -365,15 +570,15 @@
     
         <nav class="article-navigation">
             
-            <a href="plantuml-test.html" class="nav-link prev">
+            <a href="03-docker-images-and-containers.html" class="nav-link prev">
                 <div class="nav-label">← Previous</div>
-                <div class="nav-title">Testing PlantUML Diagrams</div>
+                <div class="nav-title">Docker Images and Containers Explained</div>
             </a>
             
             
-            <a href="second-post.html" class="nav-link next">
+            <a href="05-building-images-with-dockerfile.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">My First Post</div>
+                <div class="nav-title">Building Images with Dockerfile</div>
             </a>
             
         </nav>
@@ -383,6 +588,7 @@
         
         let isDark = localStorage.getItem('theme') === 'dark';
         function setTheme(dark) {
+            isDark = dark; // Update the isDark variable
             document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
             localStorage.setItem('theme', dark ? 'dark' : 'light');
             document.getElementById('themeToggle').textContent = dark ? 'Light' : 'Dark';

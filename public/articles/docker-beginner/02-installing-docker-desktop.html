@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Docker Topic 6 - Learning Never Ends</title>
+    <title>Installing Docker Desktop - Learning Never Ends</title>
     <style>
         
         :root {
@@ -48,7 +48,7 @@
         }
 
         .header {
-            padding: 2.8rem 0 1.4rem 0;
+            padding: 1.96rem 0 0.98rem 0;
             text-align: center;
             border-bottom: 1px solid var(--border);
         }
@@ -125,7 +125,43 @@
             font-size: 0.9rem;
             font-weight: 500;
             display: block;
+            margin-bottom: 1rem;
+        }
+
+        .article-excerpt-display {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
             margin-bottom: 2rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
         }
 
         .article-post h1, .article-post h2 { 
@@ -267,7 +303,7 @@
             }
             
             .header {
-                padding: 1.5rem 0 1rem 0;
+                padding: 1.05rem 0 0.7rem 0;
             }
             
             .hero-title {
@@ -329,15 +365,15 @@
     
         <nav class="article-navigation">
             
-            <a href="05-docker-topic-5.html" class="nav-link prev">
+            <a href="01-what-is-docker.html" class="nav-link prev">
                 <div class="nav-label">← Previous</div>
-                <div class="nav-title">Docker Topic 5</div>
+                <div class="nav-title">What is Docker?</div>
             </a>
             
             
-            <a href="07-docker-topic-7.html" class="nav-link next">
+            <a href="03-docker-images-and-containers.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">Docker Topic 7</div>
+                <div class="nav-title">Docker Images and Containers Explained</div>
             </a>
             
         </nav>
@@ -345,19 +381,177 @@
 
     <main class="article-content">
         <article class="article-post">
-            <h1>Docker Topic 6</h1>
+            <h1>Installing Docker Desktop</h1>
 <p><em>February 14, 2026</em></p>
-<p>This chapter explains an important Docker concept in simple terms.</p>
-<p>Practice commands:</p>
-<pre><code class="language-bash">docker ps
-docker images
-docker stop &lt;id&gt;
+<div class="article-excerpt-display"><em>Complete installation guide for Docker Desktop on macOS, Windows, and Linux with verification steps.</em></div>
+
+<div class="article-tags"><span class="tag">#docker</span><span class="tag">#installation</span><span class="tag">#setup</span><span class="tag">#beginner</span></div>
+
+<p>Ready to start your Docker journey? Let&#39;s get Docker installed on your system!</p>
+<p>Docker Desktop provides an easy way to run Docker on your development machine with a user-friendly interface.</p>
+<h2>System Requirements</h2>
+<h3>macOS</h3>
+<ul>
+<li>macOS 10.15 or later</li>
+<li>4GB RAM minimum</li>
+<li>Apple Silicon (M1/M2) or Intel processor</li>
+</ul>
+<h3>Windows</h3>
+<ul>
+<li>Windows 10/11 64-bit</li>
+<li>WSL 2 enabled</li>
+<li>4GB RAM minimum</li>
+<li>Virtualization enabled in BIOS</li>
+</ul>
+<h3>Linux</h3>
+<ul>
+<li>64-bit Ubuntu, Debian, CentOS, or Fedora</li>
+<li>4GB RAM minimum</li>
+</ul>
+<h2>Installation Steps</h2>
+<h3>macOS Installation</h3>
+<ol>
+<li><p><strong>Download Docker Desktop</strong></p>
+<pre><code class="language-bash"># Visit https://docker.com/products/docker-desktop
+# Or use Homebrew
+brew install --cask docker
 </code></pre>
-<p>Keep practicing to improve your understanding.</p>
+</li>
+<li><p><strong>Install and Launch</strong></p>
+<ul>
+<li>Run the installer</li>
+<li>Drag Docker to Applications folder</li>
+<li>Launch Docker Desktop</li>
+<li>Accept the service agreement</li>
+</ul>
+</li>
+<li><p><strong>Verify Installation</strong></p>
+<pre><code class="language-bash">docker --version
+# Output: Docker version 24.0.7, build afdd53b
+
+docker run hello-world
+# Should download and run successfully
+</code></pre>
+</li>
+</ol>
+<h3>Windows Installation</h3>
+<ol>
+<li><p><strong>Enable WSL 2</strong></p>
+<pre><code class="language-powershell"># Run as Administrator
+wsl --install
+# Restart your computer
+</code></pre>
+</li>
+<li><p><strong>Download and Install</strong></p>
+<ul>
+<li>Download from <a href="https://docker.com/products/docker-desktop">docker.com</a></li>
+<li>Run the installer with admin privileges</li>
+<li>Choose &quot;Use WSL 2&quot; during setup</li>
+</ul>
+</li>
+<li><p><strong>Verify Installation</strong></p>
+<pre><code class="language-cmd">docker --version
+docker run hello-world
+</code></pre>
+</li>
+</ol>
+<h3>Linux Installation</h3>
+<h4>Ubuntu/Debian</h4>
+<pre><code class="language-bash"># Update package index
+sudo apt update
+
+# Install Docker
+sudo apt install docker.io
+
+# Add user to docker group
+sudo usermod -aG docker $USER
+
+# Start Docker service
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Log out and back in, then verify
+docker --version
+docker run hello-world
+</code></pre>
+<h4>CentOS/RHEL</h4>
+<pre><code class="language-bash"># Install Docker
+sudo yum install docker
+
+# Start Docker service  
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Add user to docker group
+sudo usermod -aG docker $USER
+
+# Verify installation
+docker --version
+docker run hello-world
+</code></pre>
+<h2>Verification Tests</h2>
+<p>After installation, run these commands to ensure everything works:</p>
+<pre><code class="language-bash"># Check Docker version
+docker --version
+
+# Check Docker Compose version
+docker-compose --version
+
+# Run test container
+docker run hello-world
+
+# Check Docker system info
+docker system info
+
+# List running containers (should be empty initially)
+docker ps
+</code></pre>
+<h2>Expected Output</h2>
+<p>When you run <code>docker run hello-world</code>, you should see:</p>
+<pre><code>Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the &quot;hello-world&quot; image from the Docker Hub.
+ 3. The Docker daemon created a new container from that image.
+ 4. The Docker daemon streamed that output to the Docker client.
+</code></pre>
+<h2>Troubleshooting Common Issues</h2>
+<h3>Permission Denied (Linux)</h3>
+<pre><code class="language-bash"># Add user to docker group
+sudo usermod -aG docker $USER
+# Log out and back in
+</code></pre>
+<h3>WSL 2 Issues (Windows)</h3>
+<pre><code class="language-bash"># Update WSL 2 kernel
+wsl --update
+# Restart Docker Desktop
+</code></pre>
+<h3>Resource Issues</h3>
+<ul>
+<li>Increase RAM allocation in Docker Desktop settings</li>
+<li>Free up disk space (Docker needs ~2GB)</li>
+</ul>
+<h2>Docker Desktop Interface</h2>
+<p>Docker Desktop provides:</p>
+<ul>
+<li><strong>Dashboard</strong>: View running containers and images</li>
+<li><strong>Settings</strong>: Configure resources and preferences  </li>
+<li><strong>Dev Environments</strong>: Integrated development environments</li>
+<li><strong>Extensions</strong>: Additional tools and integrations</li>
+</ul>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/TOx1Ri8m44Jl_eg5Ex-0G8H3992gqXlAOME6n4gyZkpD2VNVgpY0IYkEipjwRpP9EUheUxFG5XvKzoE6w4IDEkr1HR0T8XL8dOQ1jj6sJc5rZ31cODjn0rg-jfPqCqJdWbDR1uwNQaedg3ffKWwx8CfE4Ed8mWqyHFEZz1Flz_7xlsOlZHCyB7SrmmV9ZC_zwOks7-LiEfHKYY9UsIBJpgzZArgjra_CZAxCdpntdglJcq9UdogpWLn6t_y0" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h2>What&#39;s Next?</h2>
+<p><strong>Congratulations!</strong> You now have Docker installed and ready to use.</p>
+<p>In the next article, we&#39;ll explore Docker images and containers - the core building blocks of Docker.</p>
 <hr>
 <h2>References</h2>
 <ul>
-<li><a href="https://docs.docker.com/">https://docs.docker.com/</a></li>
+<li><a href="https://docs.docker.com/desktop/">Docker Desktop Installation Guide</a></li>
+<li><a href="https://docs.docker.com/engine/install/">Docker Engine Installation</a></li>
+<li><a href="https://docs.microsoft.com/en-us/windows/wsl/install">WSL 2 Setup Guide</a></li>
 </ul>
 
         </article>
@@ -366,15 +560,15 @@ docker stop &lt;id&gt;
     
         <nav class="article-navigation">
             
-            <a href="05-docker-topic-5.html" class="nav-link prev">
+            <a href="01-what-is-docker.html" class="nav-link prev">
                 <div class="nav-label">← Previous</div>
-                <div class="nav-title">Docker Topic 5</div>
+                <div class="nav-title">What is Docker?</div>
             </a>
             
             
-            <a href="07-docker-topic-7.html" class="nav-link next">
+            <a href="03-docker-images-and-containers.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">Docker Topic 7</div>
+                <div class="nav-title">Docker Images and Containers Explained</div>
             </a>
             
         </nav>
@@ -384,6 +578,7 @@ docker stop &lt;id&gt;
         
         let isDark = localStorage.getItem('theme') === 'dark';
         function setTheme(dark) {
+            isDark = dark; // Update the isDark variable
             document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
             localStorage.setItem('theme', dark ? 'dark' : 'light');
             document.getElementById('themeToggle').textContent = dark ? 'Light' : 'Dark';

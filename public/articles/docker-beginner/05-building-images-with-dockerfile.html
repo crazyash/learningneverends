@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What is Docker? - Learning Never Ends</title>
+    <title>Building Images with Dockerfile - Learning Never Ends</title>
     <style>
         
         :root {
@@ -364,11 +364,16 @@
 
     
         <nav class="article-navigation">
-            <div></div>
             
-            <a href="02-installing-docker-desktop.html" class="nav-link next">
+            <a href="04-running-your-first-web-server.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Running Your First Web Server</div>
+            </a>
+            
+            
+            <a href="06-managing-containers.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">Installing Docker Desktop</div>
+                <div class="nav-title">Managing Docker Containers</div>
             </a>
             
         </nav>
@@ -376,94 +381,275 @@
 
     <main class="article-content">
         <article class="article-post">
-            <h1>What is Docker?</h1>
+            <h1>Building Images with Dockerfile</h1>
 <p><em>February 14, 2026</em></p>
-<div class="article-excerpt-display"><em>Understand Docker fundamentals, containers vs VMs, and why Docker revolutionizes application deployment.</em></div>
+<div class="article-excerpt-display"><em>Master creating custom Docker images with Dockerfile - from basics to optimization techniques and best practices.</em></div>
 
-<div class="article-tags"><span class="tag">#docker</span><span class="tag">#containers</span><span class="tag">#beginner</span><span class="tag">#devops</span></div>
+<div class="article-tags"><span class="tag">#docker</span><span class="tag">#dockerfile</span><span class="tag">#image-building</span><span class="tag">#containerization</span></div>
 
-<p>Have you ever heard &quot;<em>It works on my machine</em>&quot; and wondered why software behaves differently on different computers? Docker solves this age-old problem.</p>
-<p><strong>Docker</strong> is a containerization platform that packages applications with all their dependencies into lightweight, portable containers.</p>
-<h2>The Problem Docker Solves</h2>
-<p>Before Docker, applications often failed when moved between environments because of:</p>
+<p>Ready to create your own Docker images? A <strong>Dockerfile</strong> is a text file containing instructions to build a custom Docker image automatically.</p>
+<p>Think of it as a <strong>recipe</strong> that tells Docker exactly how to prepare your application for containerization.</p>
+<h2>What is a Dockerfile?</h2>
+<p>A <strong>Dockerfile</strong> is a script containing step-by-step instructions for Docker to:</p>
 <ul>
-<li>Different operating system versions</li>
-<li>Missing libraries or dependencies  </li>
-<li>Configuration differences</li>
-<li>Runtime environment mismatches</li>
+<li>Choose a base operating system</li>
+<li>Install dependencies and tools  </li>
+<li>Copy your application files</li>
+<li>Set configuration and environment</li>
+<li>Define how to run your application</li>
 </ul>
-<h2>What is a Container?</h2>
-<p>Think of a container as a <strong>lightweight, portable box</strong> that contains:</p>
-<ul>
-<li>Your application code</li>
-<li>Runtime environment (Node.js, Python, etc.)</li>
-<li>System libraries</li>
-<li>Dependencies and packages</li>
-<li>Configuration files</li>
-</ul>
+<h2>Dockerfile Structure</h2>
 <div class="plantuml-diagram">
-                <img src="http://www.plantuml.com/plantuml/svg/PO_DYW9138Jl_HJHkwyWoYW8AmXw50zjJpa6kzDD9hsmBFlkulYtx1whygKgcVNcrMgARcHd9D0nLXHbCMTi4THaCSy2fRc6Cnk2LOLpnOUBxq3Z5p2cRqUqdvSIENZZBDJa5eURkQrYd41B-MJDaY0s-6i-gbT6FwW52gI5XAVHP3bnLtL8ExYVNxMht1jj2cupwMZtrHlIuuH53XSeBQLZkVT_G0LnI7W_D9bC_x5_z9rvRiyWRKtn2W00" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
-            </div><h2>Containers vs Virtual Machines</h2>
-<table>
-<thead>
-<tr>
-<th>Aspect</th>
-<th>Containers</th>
-<th>Virtual Machines</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>Resource Usage</strong></td>
-<td>Lightweight (MB)</td>
-<td>Heavy (GB)</td>
-</tr>
-<tr>
-<td><strong>Startup Time</strong></td>
-<td>Seconds</td>
-<td>Minutes</td>
-</tr>
-<tr>
-<td><strong>Isolation</strong></td>
-<td>Process-level</td>
-<td>Hardware-level</td>
-</tr>
-<tr>
-<td><strong>OS</strong></td>
-<td>Shares host OS</td>
-<td>Full OS per VM</td>
-</tr>
-</tbody></table>
-<div class="plantuml-diagram">
-                <img src="http://www.plantuml.com/plantuml/svg/VP11QiCm44NtEiNKDx1Fa3G9wIPaKSX-B4zj4Naaf94XXDmzH3QXReqNMhq7NsysKJ18wgtwa8vwWjecyi6mA4i_0k8WcBOJQ4mWBSQnKXxr5Lk2OkTOq325MC1T0RmCvDOI55yk2fo_2y08dOiPpuIzqrSASE3MC6MjeScQULllOPkvncNwET9wcUv6gZDzgDTx_4guc209BPnGTuPf8UJcAGmckZ2stFp_bii9oao7lbngE2RArvWi5ykrpW7VV_sxKaqhrUfADQrK06iN6-hPJJR4JUhj4m00" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
-            </div><h2>Key Benefits</h2>
-<p><strong>Portability</strong>: Run anywhere Docker runs<br><strong>Performance</strong>: Near-native performance<br><strong>Consistency</strong>: Same behavior across environments<br><strong>Efficiency</strong>: Better resource utilization<br><strong>Scalability</strong>: Easy horizontal scaling</p>
-<h2>Real-World Example</h2>
-<p>Imagine you built a web application using:</p>
-<ul>
-<li>Node.js 18</li>
-<li>Express.js framework</li>
-<li>MongoDB database</li>
-<li>Specific npm packages</li>
-</ul>
-<p>Without Docker, deploying this app requires:</p>
-<ol>
-<li>Installing Node.js 18 on the server</li>
-<li>Installing MongoDB</li>
-<li>Installing all npm dependencies</li>
-<li>Configuring environment variables</li>
-<li>Hope nothing conflicts!</li>
-</ol>
-<p>With Docker, you package everything into a container and just run:</p>
-<pre><code class="language-bash">docker run myapp
+                <img src="http://www.plantuml.com/plantuml/svg/PL7BQiCm4BphAxQ-nv34lfQqDe5GqWI7KWg-gFBQLQE7aLRGKlhl9NRYHFIYPNPc7xDQUUAEWbRiZZvG8xohWBsJXXX9KWYb5KTqhLG8Zq6g1lRE2lIUiPwB8-yGaZ5VM4FuHGdyC03kIBPS42JU1YSGX6qm0Ux1En7nr_u3tRGHUvwHVdfh1hu_TkptPlPO7gyshk1G43UTGaZcAQohtROsZzmZR3JlphiGzlDOkaZXTLSzbPkgDWSaAEM9jEvxAbW0n2NB58hT_gqsQwdGJxfbhCfIg5wUQrDOhRbfhheirkKf5DkoDeVJly13tq_2F3A-beOhgD07zU_cHV1azOrHgOUhDItCPlTdsyCxuGKRlLtm4e2DyPB91fnDE1zmFk1J_nMQ9cZr1m00" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h2>Essential Dockerfile Instructions</h2>
+<h3>FROM - Base Image</h3>
+<pre><code class="language-dockerfile"># Use official Node.js runtime as base image
+FROM node:18-alpine
+
+# Use specific version for reproducibility  
+FROM nginx:1.25.3-alpine
+
+# Use Ubuntu for more control
+FROM ubuntu:22.04
 </code></pre>
-<p><strong>Result</strong>: Your app runs identically everywhere!</p>
+<h3>WORKDIR - Set Working Directory</h3>
+<pre><code class="language-dockerfile"># Set working directory inside container
+WORKDIR /app
+
+# All subsequent commands run from this directory
+</code></pre>
+<h3>COPY vs ADD</h3>
+<pre><code class="language-dockerfile"># COPY (recommended) - simple file copying
+COPY package.json ./
+COPY src/ ./src/
+
+# ADD - has additional features (tar extraction, URL download)
+ADD https://example.com/file.tar.gz /tmp/
+</code></pre>
+<h3>RUN - Execute Commands</h3>
+<pre><code class="language-dockerfile"># Install packages
+RUN apt-get update &amp;&amp; apt-get install -y curl git
+
+# Install Node.js dependencies
+RUN npm install
+
+# Chain commands for efficiency
+RUN apt-get update &amp;&amp; \
+    apt-get install -y python3 pip &amp;&amp; \
+    pip install requirements.txt
+</code></pre>
+<h3>CMD vs ENTRYPOINT</h3>
+<pre><code class="language-dockerfile"># CMD - default command (can be overridden)
+CMD [&quot;node&quot;, &quot;server.js&quot;]
+CMD [&quot;npm&quot;, &quot;start&quot;]
+
+# ENTRYPOINT - always executed (parameters appended)
+ENTRYPOINT [&quot;node&quot;, &quot;server.js&quot;]
+
+# Combined usage
+ENTRYPOINT [&quot;node&quot;]
+CMD [&quot;server.js&quot;]
+</code></pre>
+<h2>Practical Example: Node.js Web App</h2>
+<p>Let&#39;s build a complete Node.js application image:</p>
+<h3>1. Create Application Files</h3>
+<p><strong>package.json</strong></p>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;docker-node-app&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;scripts&quot;: {
+    &quot;start&quot;: &quot;node server.js&quot;
+  },
+  &quot;dependencies&quot;: {
+    &quot;express&quot;: &quot;^4.18.0&quot;
+  }
+}
+</code></pre>
+<p><strong>server.js</strong></p>
+<pre><code class="language-javascript">const express = require(&#39;express&#39;);
+const app = express();
+const PORT = 3000;
+
+app.get(&#39;/&#39;, (req, res) =&gt; {
+  res.send(&#39;&lt;h1&gt;Hello from Docker!&lt;/h1&gt;&#39;);
+});
+
+app.listen(PORT, () =&gt; {
+  console.log(`Server running on port ${PORT}`);
+});
+</code></pre>
+<h3>2. Create Dockerfile</h3>
+<pre><code class="language-dockerfile"># Use official Node.js image as base
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json first (for better caching)
+COPY package.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy application source code
+COPY . .
+
+# Expose port that app runs on
+EXPOSE 3000
+
+# Define the command to run the application
+CMD [&quot;npm&quot;, &quot;start&quot;]
+</code></pre>
+<h3>3. Build and Run</h3>
+<pre><code class="language-bash"># Build the image
+docker build -t my-node-app .
+
+# List images to verify
+docker images | grep my-node-app
+
+# Run the container
+docker run -d -p 3000:3000 --name node-server my-node-app
+
+# Test the application
+curl http://localhost:3000
+# Output: &lt;h1&gt;Hello from Docker!&lt;/h1&gt;
+</code></pre>
+<h2>Advanced Dockerfile Techniques</h2>
+<h3>Multi-Stage Builds</h3>
+<p>Great for reducing final image size:</p>
+<pre><code class="language-dockerfile"># Stage 1: Build stage
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# Stage 2: Production stage
+FROM nginx:alpine AS production
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD [&quot;nginx&quot;, &quot;-g&quot;, &quot;daemon off;&quot;]
+</code></pre>
+<h3>Environment Variables</h3>
+<pre><code class="language-dockerfile"># Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV DATABASE_URL=mongodb://localhost:27017/myapp
+
+# Use environment variables
+EXPOSE $PORT
+</code></pre>
+<h3>Health Checks</h3>
+<pre><code class="language-dockerfile"># Add health check
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+</code></pre>
+<h3>User Management</h3>
+<pre><code class="language-dockerfile"># Create non-root user for security
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+
+# Switch to non-root user
+USER nodejs
+</code></pre>
+<h2>Build Context and .dockerignore</h2>
+<h3>Understanding Build Context</h3>
+<pre><code class="language-bash"># Everything in current directory is sent to Docker daemon
+docker build .
+
+# Use specific context
+docker build /path/to/app
+</code></pre>
+<h3>.dockerignore File</h3>
+<pre><code class="language-bash"># Create .dockerignore to exclude files
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+coverage/
+.nyc_output
+</code></pre>
+<h2>Optimization Best Practices</h2>
+<h3>Layer Caching</h3>
+<pre><code class="language-dockerfile"># BAD - this invalidates cache for every code change
+COPY . .
+RUN npm install
+
+# GOOD - dependencies cached separately
+COPY package.json ./
+RUN npm install
+COPY . .
+</code></pre>
+<h3>Minimize Layers</h3>
+<pre><code class="language-dockerfile"># BAD - creates multiple layers
+RUN apt-get update
+RUN apt-get install -y curl
+RUN apt-get install -y git
+
+# GOOD - single layer
+RUN apt-get update &amp;&amp; \
+    apt-get install -y curl git &amp;&amp; \
+    rm -rf /var/lib/apt/lists/*
+</code></pre>
+<h2>Common Dockerfile Patterns</h2>
+<h3>Python Application</h3>
+<pre><code class="language-dockerfile">FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD [&quot;python&quot;, &quot;app.py&quot;]
+</code></pre>
+<h3>Java Application</h3>
+<pre><code class="language-dockerfile">FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY target/myapp.jar app.jar
+EXPOSE 8080
+CMD [&quot;java&quot;, &quot;-jar&quot;, &quot;app.jar&quot;]
+</code></pre>
+<h3>Static Website</h3>
+<pre><code class="language-dockerfile">FROM nginx:alpine
+COPY dist/ /usr/share/nginx/html
+EXPOSE 80
+CMD [&quot;nginx&quot;, &quot;-g&quot;, &quot;daemon off;&quot;]
+</code></pre>
+<h2>Troubleshooting Build Issues</h2>
+<h3>Build Cache Problems</h3>
+<pre><code class="language-bash"># Build without cache
+docker build --no-cache -t myapp .
+
+# Remove all build cache
+docker builder prune -a
+</code></pre>
+<h3>Large Image Size</h3>
+<pre><code class="language-bash"># Check image layers and sizes
+docker history myapp:latest
+
+# Use alpine images when possible
+FROM node:18-alpine  # Much smaller than node:18
+</code></pre>
+<h3>Permission Issues</h3>
+<pre><code class="language-bash"># Fix file permissions in Dockerfile
+RUN chown -R nodejs:nodejs /app
+USER nodejs
+</code></pre>
+<h2>Next Steps</h2>
+<p>Now that you can build custom images, let&#39;s learn how to manage containers effectively in the next lesson!</p>
+<p>Key takeaways:</p>
+<ul>
+<li>Dockerfiles automate image creation</li>
+<li>Layer caching speeds up builds</li>
+<li>Multi-stage builds reduce image size  </li>
+<li>Security best practices prevent vulnerabilities</li>
+</ul>
 <hr>
-<h2>What&#39;s Next?</h2>
-<p>Ready to get hands-on? In the next article, we&#39;ll install Docker and run your first container!</p>
 <h2>References</h2>
 <ul>
-<li><a href="https://docs.docker.com/get-started/">Docker Official Documentation</a></li>
-<li><a href="https://hub.docker.com/">Docker Hub - Container Registry</a></li>
+<li><a href="https://docs.docker.com/engine/reference/builder/">Dockerfile Reference</a></li>
+<li><a href="https://docs.docker.com/develop/dev-best-practices/">Best Practices Guide</a></li>
 </ul>
 
         </article>
@@ -471,11 +657,16 @@
 
     
         <nav class="article-navigation">
-            <div></div>
             
-            <a href="02-installing-docker-desktop.html" class="nav-link next">
+            <a href="04-running-your-first-web-server.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Running Your First Web Server</div>
+            </a>
+            
+            
+            <a href="06-managing-containers.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">Installing Docker Desktop</div>
+                <div class="nav-title">Managing Docker Containers</div>
             </a>
             
         </nav>

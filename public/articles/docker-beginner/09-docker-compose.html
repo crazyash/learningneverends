@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Compose for Multi-Container Apps - Learning Never Ends</title>
+    <style>
+        
+        :root {
+            --bg: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --primary: #06b6d4;
+            --primary-light: #0891b2;
+            --shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #111827;
+            --text: #f9fafb;
+            --text-light: #d1d5db;
+            --card-bg: #1f2937;
+            --border: #374151;
+            --primary: #0ea5e9;
+            --primary-light: #0284c7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            padding: 1.96rem 0 0.98rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-title {
+            font-size: clamp(2.1rem, 5.6vw, 4.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 0.7rem;
+        }
+
+        .hero-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+        }
+    
+        
+        .article-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .article-post {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .article-post h1:first-child { 
+            font-weight: 800; 
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 0.5rem 0; 
+            line-height: 1.2;
+        }
+
+        .article-post h1:first-child + p em {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .article-excerpt-display {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .article-post h1, .article-post h2 { 
+            font-weight: 700; 
+            margin: 2rem 0 1rem 0; 
+            color: var(--text);
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        }
+
+        .article-post h1:first-child, .article-post h2:first-child { 
+            margin-top: 0; 
+        }
+
+        .article-post p { 
+            margin-bottom: 1.2rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .article-post pre {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        [data-theme="dark"] .article-post pre { 
+            background: #1f2937; 
+        }
+
+        .article-post ul, .article-post ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        .article-post li {
+            margin-bottom: 0.5rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .plantuml-diagram {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .plantuml-diagram img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            padding: 0.5rem;
+        }
+
+        [data-theme="dark"] .plantuml-diagram img {
+            background: #f8fafc;
+        }
+
+        .article-navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+            max-width: 800px;
+        }
+
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            flex: 1;
+            max-width: 48%;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.25);
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.7;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .nav-link.prev {
+            text-align: left;
+        }
+
+        .nav-link.next {
+            text-align: right;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .article-content { 
+                padding: 0 0.5rem; 
+            }
+            
+            .article-post { 
+                margin: 0.5rem; 
+                padding: 1.5rem 1rem; 
+                border-radius: 12px;
+            }
+            
+            .article-navigation {
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 0 0.5rem;
+                margin: 1rem auto;
+            }
+            
+            .nav-link {
+                max-width: 100%;
+                padding: 1rem;
+                text-align: center !important;
+            }
+            
+            .nav-title {
+                font-size: 0.9rem;
+            }
+            
+            .header {
+                padding: 1.05rem 0 0.7rem 0;
+            }
+            
+            .hero-title {
+                font-size: clamp(1.8rem, 8vw, 2.5rem);
+                margin-bottom: 0.5rem;
+            }
+            
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .article-post pre {
+                font-size: 0.8rem;
+                padding: 0.75rem;
+                border-radius: 6px;
+            }
+        }
+
+        /* Small Mobile Devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .article-content {
+                padding: 0 0.25rem;
+            }
+            
+            .article-post {
+                margin: 0.25rem;
+                padding: 1rem 0.75rem;
+            }
+            
+            .nav-link {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .theme-toggle {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="themeToggle" class="theme-toggle">Dark</button>
+    
+    <header class="header">
+        <div class="container">
+            <h1 class="hero-title">
+                <a href="../../index.html">Learning Never Ends</a>
+            </h1>
+        </div>
+    </header>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="08-docker-networking.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Docker Networking Basics</div>
+            </a>
+            
+            
+            <a href="10-docker-best-practices.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">Docker Best Practices</div>
+            </a>
+            
+        </nav>
+    
+
+    <main class="article-content">
+        <article class="article-post">
+            <h1>Docker Compose for Multi-Container Apps</h1>
+<p><em>February 14, 2026</em></p>
+<div class="article-excerpt-display"><em>Master Docker Compose to orchestrate complex multi-container applications with ease and efficiency.</em></div>
+
+<div class="article-tags"><span class="tag">#docker</span><span class="tag">#compose</span><span class="tag">#orchestration</span><span class="tag">#multi-container</span></div>
+
+<p>Managing multiple containers manually becomes complex quickly. <strong>Docker Compose</strong> solves this by defining multi-container applications in a single YAML file.</p>
+<h2>What is Docker Compose?</h2>
+<p><strong>Docker Compose</strong> is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application&#39;s services, networks, and volumes.</p>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/RP8nRm8n38Nt-nNkxK5gnmu814kNgg9IE_iISut89L7YWAgg_xrAxYZaO8pVP-lvEQl863WDfddWBne8EfF81ssvOSs6OElaWG9itE1T95W7-QMP9AT0JUDH7h0dQ5MXX1ofnVTWMlXf0099HjiRWlQTmb5BWYtjjTMidOqjO8GurcDDlnAVN3Z0njczxbF0t51uEoeHeExuS2ODTAVXM8JO_5xvtILhjUrXxRtHSc9dXZ-fozCOjQLG9fsegv7rsyiCGQzhP8kC7KQQSMesQKTAnnaJSgsoFHrZ2YVUM4RlnPJFEQjx_MDKj-sg4mePpwazrcgnKm5FUVZvVY34CYS4pp3-1fX-0oHVGpcZgg0wWBeohjxaSM8XbcKHzFhoK5T2WI_FVwsiS2KMnokoAWtc3m00" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h2>Benefits of Docker Compose</h2>
+<ul>
+<li><strong>Simplified Management</strong>: Single command to start/stop entire application</li>
+<li><strong>Environment Consistency</strong>: Same configuration across dev, test, production</li>
+<li><strong>Service Dependencies</strong>: Define startup order and relationships  </li>
+<li><strong>Scaling</strong>: Easily scale services up or down</li>
+<li><strong>Networking</strong>: Automatic network creation and service discovery</li>
+</ul>
+<h2>Basic Docker Compose Structure</h2>
+<h3>docker-compose.yml Anatomy</h3>
+<pre><code class="language-yaml">version: &#39;3.8&#39;  # Compose file format version
+
+services:       # Container definitions
+  web:
+    image: nginx:latest
+    ports:
+      - &quot;8080:80&quot;
+      
+  api:
+    build: ./api
+    environment:
+      - NODE_ENV=production
+      
+  database:
+    image: postgres:15
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+networks:       # Network definitions (optional)
+  default:
+    driver: bridge
+
+volumes:        # Volume definitions (optional)
+  db_data:
+</code></pre>
+<h2>Essential Docker Compose Commands</h2>
+<pre><code class="language-bash"># Start services in background
+docker compose up -d
+
+# Start specific services
+docker compose up web database
+
+# Stop and remove containers
+docker compose down
+
+# Stop and remove everything (including volumes)
+docker compose down -v
+
+# View running services
+docker compose ps
+
+# View service logs
+docker compose logs web
+
+# Follow logs for all services
+docker compose logs -f
+
+# Execute command in running service
+docker compose exec web bash
+
+# Scale service to multiple instances
+docker compose up -d --scale web=3
+
+# Rebuild services
+docker compose up -d --build
+</code></pre>
+<h2>Practical Example: Full-Stack Web Application</h2>
+<p>Let&#39;s build a complete web application with frontend, backend, database, and cache:</p>
+<h3>Project Structure</h3>
+<pre><code>my-app/
+├── docker-compose.yml
+├── frontend/
+│   ├── Dockerfile
+│   └── src/
+├── backend/
+│   ├── Dockerfile  
+│   ├── package.json
+│   └── server.js
+└── nginx/
+    └── nginx.conf
+</code></pre>
+<h3>docker-compose.yml</h3>
+<pre><code class="language-yaml">version: &#39;3.8&#39;
+
+services:
+  # Frontend (React App)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react-app
+    restart: unless-stopped
+    
+  # Backend API (Node.js)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: node-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://admin:secret123@database:5432/myapp
+      - REDIS_URL=redis://cache:6379
+    depends_on:
+      - database
+      - cache
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      
+  # NGINX Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: reverse-proxy
+    restart: unless-stopped
+    ports:
+      - &quot;80:80&quot;
+      - &quot;443:443&quot;
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+      
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: myapp
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - &quot;5432:5432&quot;
+      
+  # Redis Cache
+  cache:
+    image: redis:7-alpine
+    container_name: redis-cache
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - &quot;6379:6379&quot;
+
+  # Background Worker
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: background-worker
+    restart: unless-stopped
+    command: npm run worker
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://admin:secret123@database:5432/myapp
+      - REDIS_URL=redis://cache:6379
+    depends_on:
+      - database
+      - cache
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  default:
+    name: myapp-network
+    driver: bridge
+</code></pre>
+<h3>Run the Application</h3>
+<pre><code class="language-bash"># Start all services
+docker compose up -d
+
+# Check status
+docker compose ps
+
+# View logs
+docker compose logs -f backend
+
+# Scale backend API
+docker compose up -d --scale backend=3
+
+# Stop everything
+docker compose down
+</code></pre>
+<h2>Service Configuration Options</h2>
+<h3>Build Configuration</h3>
+<pre><code class="language-yaml">services:
+  web:
+    build:
+      context: ./web          # Build context directory
+      dockerfile: Dockerfile.prod  # Custom Dockerfile name
+      args:                   # Build arguments
+        - NODE_ENV=production
+        - VERSION=1.2.3
+      target: production      # Multi-stage build target
+</code></pre>
+<h3>Environment Variables</h3>
+<pre><code class="language-yaml">services:
+  api:
+    image: my-api:latest
+    environment:
+      # Method 1: Key-value pairs
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://db:5432/app
+      
+    # Method 2: Dictionary format
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://db:5432/app
+      
+    # Method 3: External env file
+    env_file:
+      - .env
+      - .env.production
+</code></pre>
+<h3>Volume Mounting</h3>
+<pre><code class="language-yaml">services:
+  web:
+    image: nginx:latest
+    volumes:
+      # Named volume
+      - web_data:/usr/share/nginx/html
+      
+      # Bind mount
+      - ./website:/usr/share/nginx/html
+      
+      # Read-only bind mount
+      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
+      
+      # Anonymous volume
+      - /var/log/nginx
+</code></pre>
+<h3>Networking</h3>
+<pre><code class="language-yaml">services:
+  web:
+    image: nginx:latest
+    networks:
+      - frontend
+      - backend
+    ports:
+      - &quot;80:80&quot;           # Host:Container
+      - &quot;127.0.0.1:8080:8080&quot;  # Bind to localhost only
+      
+  api:
+    image: my-api:latest
+    networks:
+      backend:
+        aliases:          # Network aliases
+          - api-server
+          - backend-api
+    expose:              # Internal port exposure
+      - &quot;3000&quot;
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    internal: true       # No external access
+</code></pre>
+<h2>Advanced Compose Features</h2>
+<h3>Service Dependencies</h3>
+<pre><code class="language-yaml">services:
+  web:
+    image: nginx:latest
+    depends_on:
+      - api
+      - database
+    # Starts after api and database
+    
+  api:
+    image: my-api:latest
+    depends_on:
+      database:
+        condition: service_healthy
+    # Waits for database health check
+    
+  database:
+    image: postgres:15
+    healthcheck:
+      test: [&quot;CMD-SHELL&quot;, &quot;pg_isready -U admin&quot;]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+</code></pre>
+<h3>Resource Limits</h3>
+<pre><code class="language-yaml">services:
+  web:
+    image: nginx:latest
+    deploy:
+      resources:
+        limits:
+          cpus: &#39;0.5&#39;      # 50% of 1 CPU core
+          memory: 512M     # 512MB memory limit
+        reservations:
+          cpus: &#39;0.25&#39;     # Reserved CPU
+          memory: 256M     # Reserved memory
+</code></pre>
+<h3>Health Checks</h3>
+<pre><code class="language-yaml">services:
+  api:
+    image: my-api:latest
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;curl&quot;, &quot;-f&quot;, &quot;http://localhost:3000/health&quot;]
+      interval: 30s      # Check every 30 seconds
+      timeout: 10s       # Timeout after 10 seconds
+      retries: 3         # Retry 3 times before unhealthy
+      start_period: 40s  # Grace period before first check
+</code></pre>
+<h3>Restart Policies</h3>
+<pre><code class="language-yaml">services:
+  web:
+    image: nginx:latest
+    restart: unless-stopped  # Options: no, always, on-failure, unless-stopped
+    
+  worker:
+    image: my-worker:latest
+    restart: on-failure:3    # Restart max 3 times on failure
+</code></pre>
+<h2>Environment-Specific Configurations</h2>
+<h3>Multiple Compose Files</h3>
+<p><strong>docker-compose.yml</strong> (base configuration):</p>
+<pre><code class="language-yaml">version: &#39;3.8&#39;
+services:
+  web:
+    image: nginx:latest
+    volumes:
+      - ./website:/usr/share/nginx/html
+      
+  api:
+    build: ./api
+    environment:
+      - NODE_ENV=development
+</code></pre>
+<p><strong>docker-compose.prod.yml</strong> (production overrides):</p>
+<pre><code class="language-yaml">version: &#39;3.8&#39;
+services:
+  web:
+    ports:
+      - &quot;80:80&quot;
+      - &quot;443:443&quot;
+    volumes:
+      - ./ssl:/etc/ssl:ro
+      
+  api:
+    environment:
+      - NODE_ENV=production
+    deploy:
+      replicas: 3
+</code></pre>
+<pre><code class="language-bash"># Use multiple files
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Or use COMPOSE_FILE environment variable
+export COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml
+docker compose up -d
+</code></pre>
+<h3>Environment Variables in Compose</h3>
+<p><strong>.env</strong> file:</p>
+<pre><code class="language-bash">POSTGRES_PASSWORD=secret123
+REDIS_PASSWORD=cache456
+API_VERSION=1.2.3
+NGINX_PORT=8080
+</code></pre>
+<p><strong>docker-compose.yml</strong>:</p>
+<pre><code class="language-yaml">version: &#39;3.8&#39;
+services:
+  database:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      
+  web:
+    image: nginx:latest
+    ports:
+      - &quot;${NGINX_PORT}:80&quot;
+      
+  api:
+    build:
+      context: ./api
+      args:
+        VERSION: ${API_VERSION}
+</code></pre>
+<h2>Real-World Compose Examples</h2>
+<h3>WordPress with MySQL</h3>
+<pre><code class="language-yaml">version: &#39;3.8&#39;
+services:
+  wordpress:
+    image: wordpress:latest
+    ports:
+      - &quot;8080:80&quot;
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: password123
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+    depends_on:
+      - mysql
+      
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress  
+      MYSQL_PASSWORD: password123
+      MYSQL_ROOT_PASSWORD: rootpassword123
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  wordpress_data:
+  mysql_data:
+</code></pre>
+<h3>ELK Stack (Elasticsearch, Logstash, Kibana)</h3>
+<pre><code class="language-yaml">version: &#39;3.8&#39;
+services:
+  elasticsearch:
+    image: elasticsearch:8.6.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - &quot;9200:9200&quot;
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+      
+  logstash:
+    image: logstash:8.6.0
+    ports:
+      - &quot;5044:5044&quot;
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+    depends_on:
+      - elasticsearch
+      
+  kibana:
+    image: kibana:8.6.0
+    ports:
+      - &quot;5601:5601&quot;
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+
+volumes:
+  elasticsearch_data:
+</code></pre>
+<h2>Compose Best Practices</h2>
+<h3>Development Workflow</h3>
+<pre><code class="language-bash"># Development setup
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+# Watch for changes (if supported)
+docker compose up --watch
+
+# Rebuild specific service
+docker compose up -d --build api
+
+# View logs during development
+docker compose logs -f --tail=100 api
+</code></pre>
+<h3>Production Deployment</h3>
+<pre><code class="language-bash"># Production deployment
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Update single service
+docker compose pull api
+docker compose up -d --no-deps api
+
+# Backup volumes before updates
+docker compose exec database pg_dump -U admin myapp &gt; backup.sql
+</code></pre>
+<h3>Debugging and Troubleshooting</h3>
+<pre><code class="language-bash"># Check service status
+docker compose ps
+
+# View service configuration
+docker compose config
+
+# Debug specific service
+docker compose run --rm api bash
+
+# Check resource usage
+docker compose top
+
+# Restart specific service
+docker compose restart api
+</code></pre>
+<h2>Performance and Optimization</h2>
+<h3>Service Scaling</h3>
+<pre><code class="language-bash"># Scale services based on load
+docker compose up -d --scale web=3 --scale api=5
+
+# Load balance with nginx
+# (requires proper nginx configuration)
+</code></pre>
+<h3>Resource Monitoring</h3>
+<pre><code class="language-yaml">services:
+  web:
+    image: nginx:latest
+    logging:
+      driver: &quot;json-file&quot;
+      options:
+        max-size: &quot;10m&quot;
+        max-file: &quot;3&quot;
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+</code></pre>
+<h2>Migration from Docker Commands</h2>
+<h3>Before (Manual Commands)</h3>
+<pre><code class="language-bash"># Manual container management
+docker network create myapp-network
+docker volume create postgres-data
+
+docker run -d --name postgres \
+  --network myapp-network \
+  -v postgres-data:/var/lib/postgresql/data \
+  -e POSTGRES_PASSWORD=secret \
+  postgres:15
+
+docker run -d --name api \
+  --network myapp-network \
+  -p 3000:3000 \
+  my-api:latest
+
+docker run -d --name web \
+  --network myapp-network \
+  -p 80:80 \
+  nginx:latest
+</code></pre>
+<h3>After (Docker Compose)</h3>
+<pre><code class="language-yaml">version: &#39;3.8&#39;
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      
+  api:
+    image: my-api:latest
+    ports:
+      - &quot;3000:3000&quot;
+    depends_on:
+      - postgres
+      
+  web:
+    image: nginx:latest
+    ports:
+      - &quot;80:80&quot;
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+</code></pre>
+<pre><code class="language-bash"># Single command to manage everything
+docker compose up -d
+</code></pre>
+<h2>Next Steps</h2>
+<p>With Docker Compose mastered, let&#39;s explore Docker best practices and security in the final lesson!</p>
+<p>Key takeaways:</p>
+<ul>
+<li>Compose simplifies multi-container application management</li>
+<li>YAML configuration is environment-agnostic and version-controlled</li>
+<li>Service dependencies ensure proper startup order</li>
+<li>Multiple compose files enable environment-specific configurations</li>
+</ul>
+<hr>
+<h2>References</h2>
+<ul>
+<li><a href="https://docs.docker.com/compose/">Docker Compose Documentation</a></li>
+<li><a href="https://docs.docker.com/compose/compose-file/">Compose File Reference</a></li>
+</ul>
+
+        </article>
+    </main>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="08-docker-networking.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Docker Networking Basics</div>
+            </a>
+            
+            
+            <a href="10-docker-best-practices.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">Docker Best Practices</div>
+            </a>
+            
+        </nav>
+    
+
+    <script>
+        
+        let isDark = localStorage.getItem('theme') === 'dark';
+        function setTheme(dark) {
+            isDark = dark; // Update the isDark variable
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            document.getElementById('themeToggle').textContent = dark ? 'Light' : 'Dark';
+        }
+        document.getElementById('themeToggle').addEventListener('click', () => setTheme(!isDark));
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(saved === 'dark' || (!saved && prefersDark));
+    
+    </script>
+</body>
+</html>

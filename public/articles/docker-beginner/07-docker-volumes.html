@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persistent Data with Docker Volumes - Learning Never Ends</title>
+    <style>
+        
+        :root {
+            --bg: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --primary: #06b6d4;
+            --primary-light: #0891b2;
+            --shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #111827;
+            --text: #f9fafb;
+            --text-light: #d1d5db;
+            --card-bg: #1f2937;
+            --border: #374151;
+            --primary: #0ea5e9;
+            --primary-light: #0284c7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            padding: 1.96rem 0 0.98rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-title {
+            font-size: clamp(2.1rem, 5.6vw, 4.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 0.7rem;
+        }
+
+        .hero-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+        }
+    
+        
+        .article-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .article-post {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .article-post h1:first-child { 
+            font-weight: 800; 
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 0.5rem 0; 
+            line-height: 1.2;
+        }
+
+        .article-post h1:first-child + p em {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .article-excerpt-display {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .article-post h1, .article-post h2 { 
+            font-weight: 700; 
+            margin: 2rem 0 1rem 0; 
+            color: var(--text);
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        }
+
+        .article-post h1:first-child, .article-post h2:first-child { 
+            margin-top: 0; 
+        }
+
+        .article-post p { 
+            margin-bottom: 1.2rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .article-post pre {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        [data-theme="dark"] .article-post pre { 
+            background: #1f2937; 
+        }
+
+        .article-post ul, .article-post ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        .article-post li {
+            margin-bottom: 0.5rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .plantuml-diagram {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .plantuml-diagram img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            padding: 0.5rem;
+        }
+
+        [data-theme="dark"] .plantuml-diagram img {
+            background: #f8fafc;
+        }
+
+        .article-navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+            max-width: 800px;
+        }
+
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            flex: 1;
+            max-width: 48%;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.25);
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.7;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .nav-link.prev {
+            text-align: left;
+        }
+
+        .nav-link.next {
+            text-align: right;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .article-content { 
+                padding: 0 0.5rem; 
+            }
+            
+            .article-post { 
+                margin: 0.5rem; 
+                padding: 1.5rem 1rem; 
+                border-radius: 12px;
+            }
+            
+            .article-navigation {
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 0 0.5rem;
+                margin: 1rem auto;
+            }
+            
+            .nav-link {
+                max-width: 100%;
+                padding: 1rem;
+                text-align: center !important;
+            }
+            
+            .nav-title {
+                font-size: 0.9rem;
+            }
+            
+            .header {
+                padding: 1.05rem 0 0.7rem 0;
+            }
+            
+            .hero-title {
+                font-size: clamp(1.8rem, 8vw, 2.5rem);
+                margin-bottom: 0.5rem;
+            }
+            
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .article-post pre {
+                font-size: 0.8rem;
+                padding: 0.75rem;
+                border-radius: 6px;
+            }
+        }
+
+        /* Small Mobile Devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .article-content {
+                padding: 0 0.25rem;
+            }
+            
+            .article-post {
+                margin: 0.25rem;
+                padding: 1rem 0.75rem;
+            }
+            
+            .nav-link {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .theme-toggle {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="themeToggle" class="theme-toggle">Dark</button>
+    
+    <header class="header">
+        <div class="container">
+            <h1 class="hero-title">
+                <a href="../../index.html">Learning Never Ends</a>
+            </h1>
+        </div>
+    </header>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="06-managing-containers.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Managing Docker Containers</div>
+            </a>
+            
+            
+            <a href="08-docker-networking.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">Docker Networking Basics</div>
+            </a>
+            
+        </nav>
+    
+
+    <main class="article-content">
+        <article class="article-post">
+            <h1>Persistent Data with Docker Volumes</h1>
+<p><em>February 14, 2026</em></p>
+<div class="article-excerpt-display"><em>Master Docker volumes for persistent data storage, including types, management, and real-world use cases.</em></div>
+
+<div class="article-tags"><span class="tag">#docker</span><span class="tag">#volumes</span><span class="tag">#persistence</span><span class="tag">#storage</span></div>
+
+<p>By default, container data is <strong>ephemeral</strong> - it disappears when the container is removed. Docker volumes solve this problem by providing persistent storage that survives container lifecycle changes.</p>
+<h2>The Container Data Problem</h2>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/TL0nRiD03Dll5OhtV213aQ15fquficKvdnL7g2mP9pbeKVJlHSwE6nV8Hf04HMfh7hCF7OULdx53g7d0FfDuS796U5RnI88PNg97UACJfg_464B6v55QHgZ-JFj1XAIj81ha4SDt0BWpx_gUAKKdbP9PBUKhLKT3U2L6gm2Myi4mmw5dZOrLuUT1ZNVNliUcrB0HbngYZf2fFJjina7cn0puIUPsb7fm88afeHdLZ0yFxB7JotGWZ_Z_pkbXQhugDbRpaZUzPRr-chjjeD7qWRaGuSPU7RVmsP6xfJwbtIN4x26KfRMwQmTwkelPCKDpRKPYrE1HqZoA35eLN8KjIZDq_0i0" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><p><strong>Problem scenarios:</strong></p>
+<ul>
+<li>Database container removed → All data lost</li>
+<li>Web app container updated → User uploads gone</li>
+<li>Container crashes → Log files disappear</li>
+</ul>
+<h2>What are Docker Volumes?</h2>
+<p><strong>Docker volumes</strong> are the preferred way to persist data generated and used by Docker containers. They&#39;re completely managed by Docker and exist independently of containers.</p>
+<h3>Volume vs Bind Mount vs tmpfs</h3>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/TP4zJyCm48Pt_ueZ4mnLzWoeWWuicGfCIEWI7wbLVya-HufG_pjo74eYOBDzzzppsjv7ni39Q7739p84dKxaWx8iMB4cEBZ-J06Ex08E1C-JfoY4n_wSjzMJYmmjzYTbgO9F0H2ePxI39gWMzjNfP2Y-sTjwn51hrTLohjHZgTnLW16MpNR4FF-WyeaBKnvnSeRg52dK4XaBsYah_-1QCWLYupyMoxmKbzKL7frbL9R2h_mbEBGkMSvgz7ub7Pr-DxcqXHwKbVyXEMTX0BRK76kBCHb_pRoOBa8ipmIxtVrF16Y-FygWnO6aoAgvP-Liu2MkMeepzrm5q2oF1ixgIUp9ocJq5m00" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><table>
+<thead>
+<tr>
+<th>Storage Type</th>
+<th>Managed By</th>
+<th>Performance</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Volume</strong></td>
+<td>Docker</td>
+<td>Best</td>
+<td>Production databases, app data</td>
+</tr>
+<tr>
+<td><strong>Bind Mount</strong></td>
+<td>User</td>
+<td>Good</td>
+<td>Development, config files</td>
+</tr>
+<tr>
+<td><strong>tmpfs</strong></td>
+<td>Docker</td>
+<td>Fastest</td>
+<td>Temporary files, caches</td>
+</tr>
+</tbody></table>
+<h2>Working with Docker Volumes</h2>
+<h3>Creating and Managing Volumes</h3>
+<pre><code class="language-bash"># Create a named volume
+docker volume create my-data
+
+# List all volumes
+docker volume ls
+
+# Inspect volume details
+docker volume inspect my-data
+
+# Remove unused volumes
+docker volume prune
+
+# Remove specific volume (only if not in use)
+docker volume rm my-data
+</code></pre>
+<h3>Volume Information</h3>
+<pre><code class="language-bash"># Detailed volume information
+docker volume inspect my-data
+</code></pre>
+<p><strong>Output example:</strong></p>
+<pre><code class="language-json">[
+    {
+        &quot;CreatedAt&quot;: &quot;2026-02-14T10:30:45Z&quot;,
+        &quot;Driver&quot;: &quot;local&quot;,
+        &quot;Labels&quot;: {},
+        &quot;Mountpoint&quot;: &quot;/var/lib/docker/volumes/my-data/_data&quot;,
+        &quot;Name&quot;: &quot;my-data&quot;,
+        &quot;Options&quot;: {},
+        &quot;Scope&quot;: &quot;local&quot;
+    }
+]
+</code></pre>
+<h2>Using Volumes with Containers</h2>
+<h3>Named Volumes</h3>
+<pre><code class="language-bash"># Create and use named volume
+docker volume create postgres-data
+
+# Run PostgreSQL with named volume
+docker run -d --name postgres-db \
+  -e POSTGRES_PASSWORD=secret123 \
+  -v postgres-data:/var/lib/postgresql/data \
+  postgres:15
+
+# Data persists even if container is removed
+docker rm -f postgres-db
+docker run -d --name postgres-new \
+  -e POSTGRES_PASSWORD=secret123 \
+  -v postgres-data:/var/lib/postgresql/data \
+  postgres:15
+# Database data is still there!
+</code></pre>
+<h3>Anonymous Volumes</h3>
+<pre><code class="language-bash"># Docker creates anonymous volume automatically
+docker run -d -v /var/lib/mysql mysql:8.0
+
+# Anonymous volumes are harder to manage
+# Better to use named volumes in production
+</code></pre>
+<h3>Bind Mounts</h3>
+<pre><code class="language-bash"># Mount host directory into container
+docker run -d --name web-server \
+  -v /home/user/website:/usr/share/nginx/html:ro \
+  -p 8080:80 \
+  nginx:latest
+
+# :ro makes it read-only
+# :rw makes it read-write (default)
+</code></pre>
+<h2>Practical Volume Examples</h2>
+<h3>Example 1: Persistent Database</h3>
+<pre><code class="language-bash"># Create volume for PostgreSQL data
+docker volume create postgres-data
+
+# Run PostgreSQL with persistent storage
+docker run -d --name postgres \
+  -e POSTGRES_DB=myapp \
+  -e POSTGRES_USER=admin \
+  -e POSTGRES_PASSWORD=secret123 \
+  -v postgres-data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:15
+
+# Connect and create some data
+docker exec -it postgres psql -U admin -d myapp
+# CREATE TABLE users (id SERIAL, name VARCHAR(50));
+# INSERT INTO users (name) VALUES (&#39;John&#39;), (&#39;Jane&#39;);
+
+# Remove container
+docker rm -f postgres
+
+# Run new container with same volume
+docker run -d --name postgres-new \
+  -e POSTGRES_DB=myapp \
+  -e POSTGRES_USER=admin \
+  -e POSTGRES_PASSWORD=secret123 \
+  -v postgres-data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:15
+
+# Data is still there!
+docker exec -it postgres-new psql -U admin -d myapp -c &quot;SELECT * FROM users;&quot;
+</code></pre>
+<h3>Example 2: Web Application with File Uploads</h3>
+<pre><code class="language-bash"># Create volume for uploaded files
+docker volume create webapp-uploads
+
+# Run web application
+docker run -d --name webapp \
+  -v webapp-uploads:/app/uploads \
+  -p 3000:3000 \
+  my-web-app:latest
+
+# Files uploaded to /app/uploads persist across container restarts
+</code></pre>
+<h3>Example 3: Development Environment</h3>
+<pre><code class="language-bash"># Mount source code for live development
+docker run -it --name dev-env \
+  -v $(pwd):/workspace \
+  -w /workspace \
+  -p 3000:3000 \
+  node:18-alpine \
+  sh
+
+# Changes to code on host immediately visible in container
+# Perfect for development workflow
+</code></pre>
+<h2>Volume Sharing Between Containers</h2>
+<h3>Shared Data Volume</h3>
+<pre><code class="language-bash"># Create shared volume
+docker volume create shared-data
+
+# Container 1: Producer
+docker run -d --name producer \
+  -v shared-data:/data \
+  alpine sh -c &quot;while true; do echo $(date) &gt;&gt; /data/log.txt; sleep 5; done&quot;
+
+# Container 2: Consumer  
+docker run -d --name consumer \
+  -v shared-data:/data \
+  alpine sh -c &quot;while true; do tail -f /data/log.txt; sleep 1; done&quot;
+
+# View consumer logs
+docker logs -f consumer
+</code></pre>
+<h3>Volumes-from Pattern (Legacy)</h3>
+<pre><code class="language-bash"># Data container (legacy approach)
+docker create --name data-container -v /data alpine
+
+# Use data from data-container
+docker run -d --name app1 --volumes-from data-container nginx
+docker run -d --name app2 --volumes-from data-container nginx
+
+# Both containers share same data volume
+</code></pre>
+<h2>Advanced Volume Operations</h2>
+<h3>Volume Backup and Restore</h3>
+<pre><code class="language-bash"># Backup volume data
+docker run --rm -v postgres-data:/data -v $(pwd):/backup alpine \
+  tar czf /backup/postgres-backup.tar.gz -C /data .
+
+# Restore volume data
+docker volume create postgres-restored
+docker run --rm -v postgres-restored:/data -v $(pwd):/backup alpine \
+  tar xzf /backup/postgres-backup.tar.gz -C /data
+</code></pre>
+<h3>Volume Migration</h3>
+<pre><code class="language-bash"># Copy data from one volume to another
+docker run --rm -v source-volume:/from -v target-volume:/to alpine \
+  sh -c &quot;cp -av /from/* /to/&quot;
+</code></pre>
+<h3>Volume Driver Options</h3>
+<pre><code class="language-bash"># Create volume with specific options
+docker volume create --driver local \
+  --opt type=nfs \
+  --opt o=addr=192.168.1.100,rw \
+  --opt device=:/path/to/dir \
+  nfs-volume
+</code></pre>
+<h2>Volume Performance Optimization</h2>
+<h3>Best Practices for Performance</h3>
+<pre><code class="language-bash"># Use volume mount for databases (better performance)
+docker run -d --name fast-db \
+  -v db-data:/var/lib/postgresql/data \
+  postgres:15
+
+# Use bind mount for development (easier access)
+docker run -d --name dev-app \
+  -v $(pwd)/src:/app/src \
+  my-app:dev
+</code></pre>
+<h3>Volume Performance Comparison</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Volume</th>
+<th>Bind Mount</th>
+<th>tmpfs</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Database</strong></td>
+<td>Best</td>
+<td>Good</td>
+<td>Data lost</td>
+</tr>
+<tr>
+<td><strong>Development</strong></td>
+<td>Good</td>
+<td>Best</td>
+<td>Data lost</td>
+</tr>
+<tr>
+<td><strong>Temporary files</strong></td>
+<td>OK</td>
+<td>OK</td>
+<td>Fastest</td>
+</tr>
+<tr>
+<td><strong>Production</strong></td>
+<td>Best</td>
+<td>Risky</td>
+<td>Data lost</td>
+</tr>
+</tbody></table>
+<h2>Common Volume Patterns</h2>
+<h3>Database with Backup Job</h3>
+<pre><code class="language-bash"># Database container
+docker run -d --name postgres \
+  -v postgres-data:/var/lib/postgresql/data \
+  -e POSTGRES_PASSWORD=secret \
+  postgres:15
+
+# Backup job container (runs periodically)
+docker run --rm \
+  -v postgres-data:/data:ro \
+  -v $(pwd)/backups:/backups \
+  alpine sh -c &quot;tar czf /backups/db-$(date +%Y%m%d).tar.gz -C /data .&quot;
+</code></pre>
+<h3>Multi-Container Application</h3>
+<pre><code class="language-bash"># Shared volume for web app and worker
+docker volume create app-data
+
+# Web application
+docker run -d --name web \
+  -v app-data:/app/data \
+  -p 8080:80 \
+  my-web-app
+
+# Background worker
+docker run -d --name worker \
+  -v app-data:/app/data \
+  my-worker-app
+
+# Both containers can read/write shared data
+</code></pre>
+<h2>Troubleshooting Volume Issues</h2>
+<h3>Volume Not Mounting</h3>
+<pre><code class="language-bash"># Check if volume exists
+docker volume ls | grep my-volume
+
+# Check volume mount points
+docker inspect container-name | grep -A 10 &quot;Mounts&quot;
+
+# Verify permissions
+docker exec container-name ls -la /mount/path
+</code></pre>
+<h3>Data Not Persisting</h3>
+<pre><code class="language-bash"># Verify volume is mounted correctly
+docker inspect container-name | jq &#39;.[0].Mounts&#39;
+
+# Check if data is written to correct path
+docker exec container-name df -h
+</code></pre>
+<h3>Permission Problems</h3>
+<pre><code class="language-bash"># Fix ownership inside container
+docker exec container-name chown -R app:app /data
+
+# Run container with specific user
+docker run --user $(id -u):$(id -g) -v data:/app my-app
+</code></pre>
+<h2>Volume Security Best Practices</h2>
+<h3>Access Control</h3>
+<pre><code class="language-bash"># Read-only volumes for static content
+docker run -v config-data:/etc/config:ro nginx
+
+# Specific user ownership
+docker run --user 1001:1001 -v user-data:/data my-app
+</code></pre>
+<h3>Volume Encryption</h3>
+<pre><code class="language-bash"># Use encrypted storage driver (requires setup)
+docker volume create --driver encrypted-driver secure-data
+</code></pre>
+<h2>Next Steps</h2>
+<p>With persistent data mastered, let&#39;s explore Docker networking to connect containers in the next lesson!</p>
+<p>Key takeaways:</p>
+<ul>
+<li>Volumes provide persistent storage independent of container lifecycle</li>
+<li>Named volumes are preferred for production workloads</li>
+<li>Bind mounts are useful for development environments  </li>
+<li>Proper backup and restore strategies are essential for data safety</li>
+</ul>
+<hr>
+<h2>References</h2>
+<ul>
+<li><a href="https://docs.docker.com/storage/volumes/">Docker Volumes Documentation</a></li>
+<li><a href="https://docs.docker.com/storage/storagedriver/">Storage Best Practices</a></li>
+</ul>
+
+        </article>
+    </main>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="06-managing-containers.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Managing Docker Containers</div>
+            </a>
+            
+            
+            <a href="08-docker-networking.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">Docker Networking Basics</div>
+            </a>
+            
+        </nav>
+    
+
+    <script>
+        
+        let isDark = localStorage.getItem('theme') === 'dark';
+        function setTheme(dark) {
+            isDark = dark; // Update the isDark variable
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            document.getElementById('themeToggle').textContent = dark ? 'Light' : 'Dark';
+        }
+        document.getElementById('themeToggle').addEventListener('click', () => setTheme(!isDark));
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(saved === 'dark' || (!saved && prefersDark));
+    
+    </script>
+</body>
+</html>

@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Networking Basics - Learning Never Ends</title>
+    <style>
+        
+        :root {
+            --bg: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --primary: #06b6d4;
+            --primary-light: #0891b2;
+            --shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #111827;
+            --text: #f9fafb;
+            --text-light: #d1d5db;
+            --card-bg: #1f2937;
+            --border: #374151;
+            --primary: #0ea5e9;
+            --primary-light: #0284c7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            padding: 1.96rem 0 0.98rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-title {
+            font-size: clamp(2.1rem, 5.6vw, 4.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 0.7rem;
+        }
+
+        .hero-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+        }
+    
+        
+        .article-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .article-post {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .article-post h1:first-child { 
+            font-weight: 800; 
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 0.5rem 0; 
+            line-height: 1.2;
+        }
+
+        .article-post h1:first-child + p em {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .article-excerpt-display {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .article-post h1, .article-post h2 { 
+            font-weight: 700; 
+            margin: 2rem 0 1rem 0; 
+            color: var(--text);
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        }
+
+        .article-post h1:first-child, .article-post h2:first-child { 
+            margin-top: 0; 
+        }
+
+        .article-post p { 
+            margin-bottom: 1.2rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .article-post pre {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        [data-theme="dark"] .article-post pre { 
+            background: #1f2937; 
+        }
+
+        .article-post ul, .article-post ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        .article-post li {
+            margin-bottom: 0.5rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .plantuml-diagram {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .plantuml-diagram img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            padding: 0.5rem;
+        }
+
+        [data-theme="dark"] .plantuml-diagram img {
+            background: #f8fafc;
+        }
+
+        .article-navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+            max-width: 800px;
+        }
+
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            flex: 1;
+            max-width: 48%;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.25);
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.7;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .nav-link.prev {
+            text-align: left;
+        }
+
+        .nav-link.next {
+            text-align: right;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .article-content { 
+                padding: 0 0.5rem; 
+            }
+            
+            .article-post { 
+                margin: 0.5rem; 
+                padding: 1.5rem 1rem; 
+                border-radius: 12px;
+            }
+            
+            .article-navigation {
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 0 0.5rem;
+                margin: 1rem auto;
+            }
+            
+            .nav-link {
+                max-width: 100%;
+                padding: 1rem;
+                text-align: center !important;
+            }
+            
+            .nav-title {
+                font-size: 0.9rem;
+            }
+            
+            .header {
+                padding: 1.05rem 0 0.7rem 0;
+            }
+            
+            .hero-title {
+                font-size: clamp(1.8rem, 8vw, 2.5rem);
+                margin-bottom: 0.5rem;
+            }
+            
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .article-post pre {
+                font-size: 0.8rem;
+                padding: 0.75rem;
+                border-radius: 6px;
+            }
+        }
+
+        /* Small Mobile Devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .article-content {
+                padding: 0 0.25rem;
+            }
+            
+            .article-post {
+                margin: 0.25rem;
+                padding: 1rem 0.75rem;
+            }
+            
+            .nav-link {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .theme-toggle {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="themeToggle" class="theme-toggle">Dark</button>
+    
+    <header class="header">
+        <div class="container">
+            <h1 class="hero-title">
+                <a href="../../index.html">Learning Never Ends</a>
+            </h1>
+        </div>
+    </header>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="07-docker-volumes.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Persistent Data with Docker Volumes</div>
+            </a>
+            
+            
+            <a href="09-docker-compose.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">Docker Compose for Multi-Container Apps</div>
+            </a>
+            
+        </nav>
+    
+
+    <main class="article-content">
+        <article class="article-post">
+            <h1>Docker Networking Basics</h1>
+<p><em>February 14, 2026</em></p>
+<div class="article-excerpt-display"><em>Understand Docker networking fundamentals, network types, and container communication patterns.</em></div>
+
+<div class="article-tags"><span class="tag">#docker</span><span class="tag">#networking</span><span class="tag">#communication</span><span class="tag">#containers</span></div>
+
+<p>Docker networking enables containers to communicate with each other and the outside world. Understanding networking is crucial for building multi-container applications.</p>
+<h2>Container Networking Overview</h2>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/RP51Jm8n48Nl_HKZ9pmi0JGnsHW328aSL18FNaXCj_lSRTZjhksic1Z-kzcMHI3SsiwyR-QzJXnBoqrPY2lEKOAIea5jjM71cWlGl58RM7e1RokxeQbLkMOeRYo4gANQo0pKUweSqxDKkJReqQyWib0iJLQ0Udl4mcI-AXt17mMH83emPbQd6Rf9WNB2UKT2ZvLXgGtislH7T-F1w6um78olFNMBv5moNIqlIsw2HDRwN3AVNLRS1aNQpjY5rOzKFe0kfALXs4-fi3PzS3uCohno_670OdSKtEA7OOqiJcqVWJtBW3r2xo-dBQ-Smz8RxBTMS27WFRQTjKL2zr7qq9gb-DzSn5MakejeYxuhJIYckMIPI0VwQc0rd0W_5Zew8nJJgh9CfQnhRJ9nUFTTtQuKqy6aL0hEYGbCsfJ57m00" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h2>Default Docker Networks</h2>
+<p>When Docker is installed, it creates three default networks:</p>
+<h3>Bridge Network (default)</h3>
+<ul>
+<li><strong>Purpose</strong>: Default network for containers</li>
+<li><strong>Scope</strong>: Single host</li>
+<li><strong>Isolation</strong>: Containers can communicate with each other</li>
+<li><strong>External Access</strong>: Via port mapping</li>
+</ul>
+<h3>Host Network</h3>
+<ul>
+<li><strong>Purpose</strong>: Remove network isolation</li>
+<li><strong>Scope</strong>: Uses host&#39;s network directly</li>
+<li><strong>Performance</strong>: Best network performance</li>
+<li><strong>Use Case</strong>: High-performance applications</li>
+</ul>
+<h3>None Network</h3>
+<ul>
+<li><strong>Purpose</strong>: Complete network isolation</li>
+<li><strong>Scope</strong>: No network access</li>
+<li><strong>Use Case</strong>: Maximum security, batch processing</li>
+</ul>
+<pre><code class="language-bash"># List default networks
+docker network ls
+
+# Output:
+# NETWORK ID     NAME      DRIVER    SCOPE
+# 123abc456def   bridge    bridge    local
+# 789ghi012jkl   host      host      local
+# 456mno789pqr   none      null      local
+</code></pre>
+<h2>Creating and Managing Networks</h2>
+<h3>Custom Bridge Networks</h3>
+<pre><code class="language-bash"># Create a custom bridge network
+docker network create my-app-network
+
+# Create with specific subnet
+docker network create --driver bridge \
+  --subnet=172.20.0.0/16 \
+  --ip-range=172.20.240.0/20 \
+  custom-network
+
+# Inspect network details
+docker network inspect my-app-network
+
+# Remove network
+docker network rm my-app-network
+</code></pre>
+<h3>Network Drivers</h3>
+<table>
+<thead>
+<tr>
+<th>Driver</th>
+<th>Description</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>bridge</strong></td>
+<td>Default single-host networking</td>
+<td>Development, simple apps</td>
+</tr>
+<tr>
+<td><strong>host</strong></td>
+<td>Remove network isolation</td>
+<td>High performance needs</td>
+</tr>
+<tr>
+<td><strong>none</strong></td>
+<td>Disable networking</td>
+<td>Security, isolated processing</td>
+</tr>
+<tr>
+<td><strong>overlay</strong></td>
+<td>Multi-host networking</td>
+<td>Docker Swarm clusters</td>
+</tr>
+<tr>
+<td><strong>macvlan</strong></td>
+<td>Assign MAC addresses</td>
+<td>Legacy app integration</td>
+</tr>
+</tbody></table>
+<h2>Container Network Communication</h2>
+<h3>Same Network Communication</h3>
+<pre><code class="language-bash"># Create custom network
+docker network create app-network
+
+# Run containers on same network
+docker run -d --name web-server --network app-network nginx:latest
+docker run -d --name app-server --network app-network node:18-alpine
+docker run -d --name database --network app-network postgres:15
+
+# Containers can communicate using container names
+# web-server can reach app-server at http://app-server:3000
+# app-server can reach database at postgresql://database:5432
+</code></pre>
+<h3>Connecting Existing Containers to Networks</h3>
+<pre><code class="language-bash"># Run container on default network
+docker run -d --name existing-app nginx:latest
+
+# Connect to custom network
+docker network connect app-network existing-app
+
+# Now accessible via both default bridge and app-network
+# Disconnect from a network
+docker network disconnect bridge existing-app
+</code></pre>
+<h2>Practical Networking Examples</h2>
+<h3>Example 1: Web Application with Database</h3>
+<pre><code class="language-bash"># Create application network
+docker network create webapp-network
+
+# Run PostgreSQL database
+docker run -d --name postgres-db \
+  --network webapp-network \
+  -e POSTGRES_DB=webapp \
+  -e POSTGRES_USER=admin \
+  -e POSTGRES_PASSWORD=secret123 \
+  postgres:15
+
+# Run web application
+docker run -d --name web-app \
+  --network webapp-network \
+  -p 8080:3000 \
+  -e DATABASE_URL=postgresql://admin:secret123@postgres-db:5432/webapp \
+  my-web-app:latest
+
+# Application connects to database using hostname &quot;postgres-db&quot;
+</code></pre>
+<h3>Example 2: Load Balancer Setup</h3>
+<pre><code class="language-bash"># Create network for load balanced setup
+docker network create lb-network
+
+# Run multiple web servers
+docker run -d --name web1 --network lb-network nginx:latest
+docker run -d --name web2 --network lb-network nginx:latest  
+docker run -d --name web3 --network lb-network nginx:latest
+
+# Run NGINX load balancer
+docker run -d --name load-balancer \
+  --network lb-network \
+  -p 80:80 \
+  -v $(pwd)/nginx.conf:/etc/nginx/nginx.conf:ro \
+  nginx:latest
+</code></pre>
+<p><strong>nginx.conf for load balancing:</strong></p>
+<pre><code class="language-nginx">upstream backend {
+    server web1:80;
+    server web2:80;
+    server web3:80;
+}
+
+server {
+    listen 80;
+    location / {
+        proxy_pass http://backend;
+    }
+}
+</code></pre>
+<h3>Example 3: Microservices Communication</h3>
+<pre><code class="language-bash"># Create microservices network
+docker network create microservices
+
+# User service
+docker run -d --name user-service \
+  --network microservices \
+  -e SERVICE_NAME=user-service \
+  my-user-service:latest
+
+# Order service
+docker run -d --name order-service \
+  --network microservices \
+  -e SERVICE_NAME=order-service \
+  -e USER_SERVICE_URL=http://user-service:3000 \
+  my-order-service:latest
+
+# API Gateway
+docker run -d --name api-gateway \
+  --network microservices \
+  -p 8080:80 \
+  -e USER_SERVICE=http://user-service:3000 \
+  -e ORDER_SERVICE=http://order-service:3000 \
+  my-api-gateway:latest
+</code></pre>
+<h2>Port Mapping and Exposure</h2>
+<h3>Understanding Port Mapping</h3>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/PP31IiGm48RlUOfnJtfOwB7q80khYnuKhq91OdRQXardmcIo5SHtbxQxrTLRc7p_zsUoIMf5Sn_CbNRO8xo7Z54ygL6l0U65HU79nkYfXLtWmHX1fvRQWB1wu3JUkiuJrdJzobbWottCYdAp0fkW6ubF0_0hDJdBeYmMuYsogFcwSD-nEw30C-h0SfXGciz_VLicjPvGQZgf9zgTnujzgOBr-dQnLR2EqtEgiZ3duGXS2g2QFwDX6QpiFRN642k2-BPJuEPd4wZW_aDHo0Qmpc5ADHszXS3EXf6gnhev7R2Pml_A7kbaI2X7xx0coPI02UAyfDaWxNCVlW40" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h3>Port Mapping Examples</h3>
+<pre><code class="language-bash"># Map single port
+docker run -d -p 8080:80 nginx:latest
+
+# Map multiple ports
+docker run -d -p 8080:80 -p 8443:443 nginx:latest
+
+# Map to specific host interface
+docker run -d -p 127.0.0.1:8080:80 nginx:latest
+
+# Map random host port
+docker run -d -P nginx:latest
+
+# Check port mappings
+docker port container-name
+</code></pre>
+<h3>EXPOSE vs Publish</h3>
+<pre><code class="language-dockerfile"># Dockerfile
+EXPOSE 80 443
+# Documents which ports the container uses
+# Doesn&#39;t actually publish ports
+
+# Runtime publishing
+docker run -d -p 8080:80 my-app
+# Actually maps host port 8080 to container port 80
+</code></pre>
+<h2>Network Isolation and Security</h2>
+<h3>Network Segmentation</h3>
+<pre><code class="language-bash"># Frontend network
+docker network create frontend-network
+
+# Backend network  
+docker network create backend-network
+
+# Database network
+docker network create database-network
+
+# Web server - only on frontend
+docker run -d --name web \
+  --network frontend-network \
+  -p 80:80 nginx:latest
+
+# API server - on both frontend and backend
+docker run -d --name api \
+  --network frontend-network \
+  my-api:latest
+docker network connect backend-network api
+
+# Database - only on backend
+docker run -d --name db \
+  --network backend-network \
+  postgres:15
+
+# Result: web can reach api, api can reach db, but web cannot reach db directly
+</code></pre>
+<h3>Internal Networks</h3>
+<pre><code class="language-bash"># Create internal network (no external access)
+docker network create --internal secure-network
+
+# Containers on internal network cannot reach internet
+docker run -d --name secure-app --network secure-network alpine
+docker exec secure-app ping google.com  # This will fail
+</code></pre>
+<h2>Advanced Networking Concepts</h2>
+<h3>Custom DNS Resolution</h3>
+<pre><code class="language-bash"># Run container with custom hostname
+docker run -d --name web --hostname webserver nginx:latest
+
+# Add DNS entries
+docker run -d --name app \
+  --add-host database:172.17.0.5 \
+  --add-host cache:172.17.0.6 \
+  my-app:latest
+
+# Container can resolve &#39;database&#39; and &#39;cache&#39; to specified IPs
+</code></pre>
+<h3>Network Aliases</h3>
+<pre><code class="language-bash"># Create network
+docker network create app-network
+
+# Run container with network alias
+docker run -d --name postgres-primary \
+  --network app-network \
+  --network-alias database \
+  --network-alias db \
+  postgres:15
+
+# Other containers can reach it via &#39;postgres-primary&#39;, &#39;database&#39;, or &#39;db&#39;
+</code></pre>
+<h3>Static IP Assignment</h3>
+<pre><code class="language-bash"># Create network with specific subnet
+docker network create --subnet=172.20.0.0/16 static-network
+
+# Run container with static IP
+docker run -d --name web-server \
+  --network static-network \
+  --ip 172.20.0.10 \
+  nginx:latest
+
+# Container will always have IP 172.20.0.10 on this network
+</code></pre>
+<h2>Network Troubleshooting</h2>
+<h3>Common Networking Issues</h3>
+<h4>Container Cannot Connect to Another Container</h4>
+<pre><code class="language-bash"># Check if containers are on same network
+docker inspect container1 | grep NetworkMode
+docker inspect container2 | grep NetworkMode
+
+# List container networks
+docker network ls
+docker network inspect bridge
+
+# Test connectivity
+docker exec container1 ping container2
+docker exec container1 nslookup container2
+</code></pre>
+<h4>Port Mapping Not Working</h4>
+<pre><code class="language-bash"># Check port mappings
+docker port container-name
+
+# Verify service is running inside container
+docker exec container-name netstat -tulpn
+
+# Test from inside container
+docker exec container-name curl http://localhost:80
+
+# Check for port conflicts
+sudo netstat -tulpn | grep :8080
+</code></pre>
+<h4>DNS Resolution Problems</h4>
+<pre><code class="language-bash"># Check DNS configuration
+docker exec container-name cat /etc/resolv.conf
+
+# Test DNS resolution
+docker exec container-name nslookup other-container
+docker exec container-name dig other-container
+
+# Check network configuration
+docker network inspect network-name
+</code></pre>
+<h3>Network Debugging Tools</h3>
+<pre><code class="language-bash"># Run debug container with network tools
+docker run -it --rm --network container:target-container \
+  nicolaka/netshoot
+
+# Or attach to existing container&#39;s network namespace
+docker run -it --rm --pid container:target-container \
+  --network container:target-container \
+  --cap-add SYS_PTRACE \
+  nicolaka/netshoot
+</code></pre>
+<h3>Monitoring Network Traffic</h3>
+<pre><code class="language-bash"># Monitor network usage
+docker stats container-name
+
+# Capture network packets (requires privileged mode)
+docker run -it --rm --net container:target-container \
+  --privileged \
+  nicolaka/netshoot tcpdump -i eth0
+</code></pre>
+<h2>Docker Compose Networking</h2>
+<h3>Automatic Network Creation</h3>
+<pre><code class="language-yaml"># docker-compose.yml
+version: &#39;3.8&#39;
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - &quot;8080:80&quot;
+  
+  api:
+    image: my-api:latest
+    
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: secret
+
+# Compose automatically creates a network
+# Services can reach each other by service name
+# web -&gt; http://api:3000
+# api -&gt; postgresql://db:5432
+</code></pre>
+<h3>Custom Networks in Compose</h3>
+<pre><code class="language-yaml">version: &#39;3.8&#39;
+services:
+  web:
+    image: nginx:latest
+    networks:
+      - frontend
+      
+  api:
+    image: my-api:latest
+    networks:
+      - frontend
+      - backend
+      
+  db:
+    image: postgres:15
+    networks:
+      - backend
+    environment:
+      POSTGRES_PASSWORD: secret
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    internal: true  # No external access
+</code></pre>
+<h2>Best Practices for Docker Networking</h2>
+<h3>Development</h3>
+<ul>
+<li>Use custom networks instead of default bridge</li>
+<li>Name containers descriptively for easy reference</li>
+<li>Use Docker Compose for multi-container applications</li>
+</ul>
+<h3>Production</h3>
+<ul>
+<li>Implement proper network segmentation</li>
+<li>Use internal networks for sensitive services</li>
+<li>Monitor network performance and security</li>
+<li>Document network topology</li>
+</ul>
+<h3>Security</h3>
+<ul>
+<li>Follow principle of least privilege</li>
+<li>Use internal networks for service-to-service communication</li>
+<li>Regularly audit network configurations</li>
+<li>Implement proper firewall rules</li>
+</ul>
+<h2>Next Steps</h2>
+<p>With networking mastered, let&#39;s explore Docker Compose for orchestrating multi-container applications in the next lesson!</p>
+<p>Key takeaways:</p>
+<ul>
+<li>Custom networks provide better isolation and communication</li>
+<li>Container names serve as hostnames within the same network</li>
+<li>Port mapping enables external access to containerized services</li>
+<li>Network segmentation improves security and organization</li>
+</ul>
+<hr>
+<h2>References</h2>
+<ul>
+<li><a href="https://docs.docker.com/network/">Docker Networking Documentation</a></li>
+<li><a href="https://docs.docker.com/network/security/">Network Security Best Practices</a></li>
+</ul>
+
+        </article>
+    </main>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="07-docker-volumes.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Persistent Data with Docker Volumes</div>
+            </a>
+            
+            
+            <a href="09-docker-compose.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">Docker Compose for Multi-Container Apps</div>
+            </a>
+            
+        </nav>
+    
+
+    <script>
+        
+        let isDark = localStorage.getItem('theme') === 'dark';
+        function setTheme(dark) {
+            isDark = dark; // Update the isDark variable
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            document.getElementById('themeToggle').textContent = dark ? 'Light' : 'Dark';
+        }
+        document.getElementById('themeToggle').addEventListener('click', () => setTheme(!isDark));
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(saved === 'dark' || (!saved && prefersDark));
+    
+    </script>
+</body>
+</html>

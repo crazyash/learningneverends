@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Managing Docker Containers - Learning Never Ends</title>
+    <style>
+        
+        :root {
+            --bg: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --primary: #06b6d4;
+            --primary-light: #0891b2;
+            --shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #111827;
+            --text: #f9fafb;
+            --text-light: #d1d5db;
+            --card-bg: #1f2937;
+            --border: #374151;
+            --primary: #0ea5e9;
+            --primary-light: #0284c7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            padding: 1.96rem 0 0.98rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-title {
+            font-size: clamp(2.1rem, 5.6vw, 4.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 0.7rem;
+        }
+
+        .hero-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+        }
+    
+        
+        .article-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .article-post {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .article-post h1:first-child { 
+            font-weight: 800; 
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 0.5rem 0; 
+            line-height: 1.2;
+        }
+
+        .article-post h1:first-child + p em {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .article-excerpt-display {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .article-post h1, .article-post h2 { 
+            font-weight: 700; 
+            margin: 2rem 0 1rem 0; 
+            color: var(--text);
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        }
+
+        .article-post h1:first-child, .article-post h2:first-child { 
+            margin-top: 0; 
+        }
+
+        .article-post p { 
+            margin-bottom: 1.2rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .article-post pre {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        [data-theme="dark"] .article-post pre { 
+            background: #1f2937; 
+        }
+
+        .article-post ul, .article-post ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        .article-post li {
+            margin-bottom: 0.5rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .plantuml-diagram {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .plantuml-diagram img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            padding: 0.5rem;
+        }
+
+        [data-theme="dark"] .plantuml-diagram img {
+            background: #f8fafc;
+        }
+
+        .article-navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+            max-width: 800px;
+        }
+
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            flex: 1;
+            max-width: 48%;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.25);
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.7;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .nav-link.prev {
+            text-align: left;
+        }
+
+        .nav-link.next {
+            text-align: right;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .article-content { 
+                padding: 0 0.5rem; 
+            }
+            
+            .article-post { 
+                margin: 0.5rem; 
+                padding: 1.5rem 1rem; 
+                border-radius: 12px;
+            }
+            
+            .article-navigation {
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 0 0.5rem;
+                margin: 1rem auto;
+            }
+            
+            .nav-link {
+                max-width: 100%;
+                padding: 1rem;
+                text-align: center !important;
+            }
+            
+            .nav-title {
+                font-size: 0.9rem;
+            }
+            
+            .header {
+                padding: 1.05rem 0 0.7rem 0;
+            }
+            
+            .hero-title {
+                font-size: clamp(1.8rem, 8vw, 2.5rem);
+                margin-bottom: 0.5rem;
+            }
+            
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .article-post pre {
+                font-size: 0.8rem;
+                padding: 0.75rem;
+                border-radius: 6px;
+            }
+        }
+
+        /* Small Mobile Devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .article-content {
+                padding: 0 0.25rem;
+            }
+            
+            .article-post {
+                margin: 0.25rem;
+                padding: 1rem 0.75rem;
+            }
+            
+            .nav-link {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .theme-toggle {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="themeToggle" class="theme-toggle">Dark</button>
+    
+    <header class="header">
+        <div class="container">
+            <h1 class="hero-title">
+                <a href="../../index.html">Learning Never Ends</a>
+            </h1>
+        </div>
+    </header>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="05-building-images-with-dockerfile.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Building Images with Dockerfile</div>
+            </a>
+            
+            
+            <a href="07-docker-volumes.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">Persistent Data with Docker Volumes</div>
+            </a>
+            
+        </nav>
+    
+
+    <main class="article-content">
+        <article class="article-post">
+            <h1>Managing Docker Containers</h1>
+<p><em>February 14, 2026</em></p>
+<div class="article-excerpt-display"><em>Master essential Docker container management commands for lifecycle control, monitoring, and troubleshooting.</em></div>
+
+<div class="article-tags"><span class="tag">#docker</span><span class="tag">#containers</span><span class="tag">#management</span><span class="tag">#lifecycle</span></div>
+
+<p>Container management is a crucial skill for Docker developers. Let&#39;s master the essential commands to control, monitor, and troubleshoot containers effectively.</p>
+<h2>Container Lifecycle Overview</h2>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/TL6xRiCm4DllAwuP2-G7EXG1CXNer8vD1qMc7Q5w6D8fYF--i6pPRf1k17ayygH34XKbEqjFSe43dsr67uqN4YCMV0nUbF68_6vQw45R42LH0jwzETLXnognSLqbZn5Aq1HQJxXA7zbxuxiYnGapL_5JGj_FlZJXnGSNhhCK9qpqzVpD-_rhYJQkAtZEunTkWlv1d8b5hw6B7hEdQdeuK9w7AZsEpDss8w6dolw_f5ow6Phks5HnVs8UwBnlYNmGS3JTHJYqcwZrdvGMSuKTJXutw2oZtiUWaHBIdNyzPlNZPf8aFcSvUHzMQmsxhx0KNLVeu7eBAIKQZAZXDWR7QKW2HmVu9Zlx2m00" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h2>Essential Container Commands</h2>
+<h3>Listing Containers</h3>
+<pre><code class="language-bash"># Show running containers
+docker ps
+
+# Show all containers (including stopped)
+docker ps -a
+
+# Show only container IDs
+docker ps -q
+
+# Show containers with custom format
+docker ps --format &quot;table {{.Names}}\t{{.Status}}\t{{.Ports}}&quot;
+
+# Show container sizes
+docker ps -s
+</code></pre>
+<h3>Creating and Running Containers</h3>
+<pre><code class="language-bash"># Create a container (but don&#39;t start it)
+docker create --name my-nginx nginx:latest
+
+# Run a container (create + start)
+docker run -d --name web-server nginx:latest
+
+# Run with port mapping
+docker run -d -p 8080:80 --name web nginx:latest
+
+# Run interactively
+docker run -it ubuntu:latest bash
+
+# Run with environment variables
+docker run -d -e NODE_ENV=production -e PORT=3000 node-app
+
+# Run with volume mount
+docker run -d -v /host/path:/container/path nginx
+</code></pre>
+<h3>Starting and Stopping Containers</h3>
+<pre><code class="language-bash"># Start a stopped container
+docker start my-nginx
+
+# Start multiple containers
+docker start web-server app-server db-server
+
+# Stop a running container (graceful shutdown)
+docker stop my-nginx
+
+# Stop with timeout (default 10 seconds)
+docker stop -t 30 my-nginx
+
+# Force stop container (immediate)
+docker kill my-nginx
+
+# Restart a container
+docker restart my-nginx
+</code></pre>
+<h3>Container Information and Monitoring</h3>
+<pre><code class="language-bash"># View detailed container information
+docker inspect my-nginx
+
+# Show container logs
+docker logs my-nginx
+
+# Follow logs in real-time
+docker logs -f my-nginx
+
+# Show recent logs with timestamps
+docker logs -t --since=&quot;2h&quot; my-nginx
+
+# Show resource usage statistics
+docker stats
+
+# Show stats for specific containers
+docker stats web-server db-server
+
+# Show container processes
+docker top my-nginx
+</code></pre>
+<h3>Executing Commands in Containers</h3>
+<pre><code class="language-bash"># Execute command in running container
+docker exec my-nginx ls -la /usr/share/nginx/html
+
+# Interactive bash session
+docker exec -it my-nginx bash
+
+# Execute as different user
+docker exec -u root -it my-nginx bash
+
+# Execute command with environment variables
+docker exec -e DEBUG=true my-nginx node debug.js
+</code></pre>
+<h3>Container File Operations</h3>
+<pre><code class="language-bash"># Copy file from container to host
+docker cp my-nginx:/usr/share/nginx/html/index.html ./index.html
+
+# Copy file from host to container
+docker cp ./custom.html my-nginx:/usr/share/nginx/html/
+
+# Copy entire directory
+docker cp ./website/. my-nginx:/usr/share/nginx/html/
+</code></pre>
+<h2>Advanced Container Management</h2>
+<h3>Container Health and Status</h3>
+<pre><code class="language-bash"># Check container health status
+docker ps --filter &quot;health=healthy&quot;
+docker ps --filter &quot;health=unhealthy&quot;
+
+# Show only running containers
+docker ps --filter &quot;status=running&quot;
+
+# Show containers created in last hour
+docker ps --filter &quot;since=1h&quot;
+
+# Show containers by name pattern
+docker ps --filter &quot;name=web*&quot;
+</code></pre>
+<h3>Resource Management</h3>
+<pre><code class="language-bash"># Run container with memory limit
+docker run -d --memory=&quot;256m&quot; nginx:latest
+
+# Run with CPU limit (half a CPU core)  
+docker run -d --cpus=&quot;0.5&quot; nginx:latest
+
+# Run with both CPU and memory limits
+docker run -d --memory=&quot;512m&quot; --cpus=&quot;1&quot; nginx:latest
+
+# Update resource limits for running container
+docker update --memory=&quot;1g&quot; --cpus=&quot;2&quot; my-container
+</code></pre>
+<h3>Container Cleanup</h3>
+<pre><code class="language-bash"># Remove a stopped container
+docker rm my-nginx
+
+# Remove multiple containers
+docker rm web1 web2 web3
+
+# Force remove running container
+docker rm -f my-nginx
+
+# Remove all stopped containers
+docker container prune
+
+# Remove containers older than 24 hours
+docker container prune --filter &quot;until=24h&quot;
+</code></pre>
+<h2>Practical Container Management Scenarios</h2>
+<h3>Scenario 1: Web Server Management</h3>
+<pre><code class="language-bash"># Deploy NGINX web server
+docker run -d -p 80:80 --name production-web \
+  --restart=unless-stopped \
+  --memory=&quot;512m&quot; \
+  nginx:latest
+
+# Monitor web server
+docker logs -f production-web
+docker stats production-web
+
+# Update web content
+docker cp ./new-website/. production-web:/usr/share/nginx/html/
+
+# Restart web server
+docker restart production-web
+</code></pre>
+<h3>Scenario 2: Database Container Management</h3>
+<pre><code class="language-bash"># Run PostgreSQL database
+docker run -d --name postgres-db \
+  -e POSTGRES_DB=myapp \
+  -e POSTGRES_USER=admin \
+  -e POSTGRES_PASSWORD=secret123 \
+  -v postgres-data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:15
+
+# Connect to database
+docker exec -it postgres-db psql -U admin -d myapp
+
+# Backup database
+docker exec postgres-db pg_dump -U admin myapp &gt; backup.sql
+
+# Monitor database performance
+docker stats postgres-db
+</code></pre>
+<h3>Scenario 3: Development Environment</h3>
+<pre><code class="language-bash"># Create development container with volume mount
+docker run -it --name dev-env \
+  -v $(pwd):/workspace \
+  -w /workspace \
+  -p 3000:3000 \
+  node:18-alpine \
+  sh
+
+# Install dependencies inside container
+docker exec -it dev-env npm install
+
+# Run development server
+docker exec -d dev-env npm start
+
+# View application logs
+docker logs -f dev-env
+</code></pre>
+<h2>Container Networking and Communication</h2>
+<pre><code class="language-bash"># Create custom network
+docker network create my-network
+
+# Run containers on same network
+docker run -d --network my-network --name web nginx:latest
+docker run -d --network my-network --name api node:18-alpine
+
+# Containers can communicate using names
+# web container can reach api at http://api:3000
+
+# Connect existing container to network
+docker network connect my-network existing-container
+
+# Disconnect container from network
+docker network disconnect my-network container-name
+</code></pre>
+<h2>Container Troubleshooting</h2>
+<h3>Common Issues and Solutions</h3>
+<h4>Container Won&#39;t Start</h4>
+<pre><code class="language-bash"># Check container logs for errors
+docker logs container-name
+
+# Inspect container configuration
+docker inspect container-name
+
+# Check if port is already in use
+netstat -tulpn | grep :8080
+</code></pre>
+<h4>Container Consuming Too Much Resources</h4>
+<pre><code class="language-bash"># Check resource usage
+docker stats container-name
+
+# Update resource limits
+docker update --memory=&quot;256m&quot; --cpus=&quot;0.5&quot; container-name
+
+# Restart with new limits
+docker restart container-name
+</code></pre>
+<h4>Can&#39;t Access Application</h4>
+<pre><code class="language-bash"># Verify container is running
+docker ps
+
+# Check port mapping
+docker port container-name
+
+# Test from inside container
+docker exec container-name curl http://localhost:8080
+
+# Check network connectivity
+docker exec container-name ping google.com
+</code></pre>
+<h2>Container Automation and Scripting</h2>
+<h3>Batch Operations</h3>
+<pre><code class="language-bash">#!/bin/bash
+# Stop all running containers
+docker stop $(docker ps -q)
+
+# Remove all stopped containers
+docker container prune -f
+
+# Remove all unused images
+docker image prune -f
+
+# Start specific services
+containers=(&quot;web-server&quot; &quot;api-server&quot; &quot;database&quot;)
+for container in &quot;${containers[@]}&quot;; do
+    echo &quot;Starting $container...&quot;
+    docker start &quot;$container&quot;
+done
+</code></pre>
+<h3>Health Check Script</h3>
+<pre><code class="language-bash">#!/bin/bash
+# Check container health
+check_container() {
+    if docker ps | grep -q &quot;$1&quot;; then
+        echo &quot; $1 is running&quot;
+    else
+        echo &quot; $1 is not running&quot;
+        echo &quot;Starting $1...&quot;
+        docker start &quot;$1&quot;
+    fi
+}
+
+check_container &quot;web-server&quot;
+check_container &quot;database&quot;
+check_container &quot;cache&quot;
+</code></pre>
+<h2>Best Practices for Container Management</h2>
+<h3>Naming and Organization</h3>
+<ul>
+<li>Use descriptive container names</li>
+<li>Follow consistent naming conventions</li>
+<li>Group related containers with prefixes</li>
+<li>Use labels for better organization</li>
+</ul>
+<h3>Resource Management</h3>
+<ul>
+<li>Set appropriate memory and CPU limits</li>
+<li>Monitor resource usage regularly</li>
+<li>Use restart policies for production containers</li>
+<li>Clean up unused containers regularly</li>
+</ul>
+<h3>Security</h3>
+<ul>
+<li>Run containers as non-root users when possible</li>
+<li>Limit container capabilities</li>
+<li>Use read-only filesystems when appropriate</li>
+<li>Regularly update base images</li>
+</ul>
+<h3>Monitoring and Logging</h3>
+<ul>
+<li>Centralize log collection</li>
+<li>Set up health checks for critical services</li>
+<li>Monitor resource consumption</li>
+<li>Implement alerting for container failures</li>
+</ul>
+<h2>Next Steps</h2>
+<p>Now that you understand container management, let&#39;s explore persistent data storage with Docker volumes in the next lesson!</p>
+<p>Key takeaways:</p>
+<ul>
+<li>Container lifecycle management is essential for production deployments</li>
+<li>Monitoring and resource management prevent performance issues</li>
+<li>Proper cleanup maintains system health</li>
+<li>Automation scripts improve operational efficiency</li>
+</ul>
+<hr>
+<h2>References</h2>
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/container/">Docker Container Commands</a></li>
+<li><a href="https://docs.docker.com/config/containers/resource_constraints/">Container Resource Management</a></li>
+</ul>
+
+        </article>
+    </main>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="05-building-images-with-dockerfile.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Building Images with Dockerfile</div>
+            </a>
+            
+            
+            <a href="07-docker-volumes.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">Persistent Data with Docker Volumes</div>
+            </a>
+            
+        </nav>
+    
+
+    <script>
+        
+        let isDark = localStorage.getItem('theme') === 'dark';
+        function setTheme(dark) {
+            isDark = dark; // Update the isDark variable
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            document.getElementById('themeToggle').textContent = dark ? 'Light' : 'Dark';
+        }
+        document.getElementById('themeToggle').addEventListener('click', () => setTheme(!isDark));
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(saved === 'dark' || (!saved && prefersDark));
+    
+    </script>
+</body>
+</html>

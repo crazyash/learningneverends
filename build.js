@@ -85,7 +85,7 @@ function getSharedStyles() {
         }
 
         .header {
-            padding: 2.8rem 0 1.4rem 0;
+            padding: 1.96rem 0 0.98rem 0;
             text-align: center;
             border-bottom: 1px solid var(--border);
         }
@@ -178,6 +178,7 @@ function getThemeScript() {
     return `
         let isDark = localStorage.getItem('theme') === 'dark';
         function setTheme(dark) {
+            isDark = dark; // Update the isDark variable
             document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
             localStorage.setItem('theme', dark ? 'dark' : 'light');
             document.getElementById('themeToggle').textContent = dark ? 'Light' : 'Dark';
@@ -232,7 +233,43 @@ function getArticleTemplate(title, date, content, slug, navigation = null, relat
             font-size: 0.9rem;
             font-weight: 500;
             display: block;
+            margin-bottom: 1rem;
+        }
+
+        .article-excerpt-display {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
             margin-bottom: 2rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
         }
 
         .article-post h1, .article-post h2 { 
@@ -374,7 +411,7 @@ function getArticleTemplate(title, date, content, slug, navigation = null, relat
             }
             
             .header {
-                padding: 1.5rem 0 1rem 0;
+                padding: 1.05rem 0 0.7rem 0;
             }
             
             .hero-title {
@@ -499,6 +536,7 @@ function parseArticle(filename) {
         excerpt: data.excerpt || markdown.substring(0, 150).replace(/[#*_]/g, '') + '...',
         content: markdown,
         tags: data.tags || [],
+        author: data.author || '',
         // Add numerical order for sorting
         order: extractOrder(baseName)
     };
@@ -526,6 +564,8 @@ async function buildArticles() {
             date: article.date, 
             excerpt: article.excerpt,
             content: article.content,
+            tags: article.tags,
+            author: article.author,
             order: article.order
         });
     }
@@ -562,8 +602,19 @@ async function buildArticles() {
             fs.mkdirSync(outputDir, { recursive: true });
         }
         
-        // Add title and date to the beginning of the content
-        const contentWithHeader = `# ${article.title}\n\n*${new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}*\n\n${article.content.replace(/^#\s+.*$/m, '').trim()}`;
+        // Add title, date, excerpt, and tags to the beginning of the content
+        let contentWithHeader = `# ${article.title}\n\n*${new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}*\n\n`;
+        
+        if (article.excerpt) {
+            contentWithHeader += `<div class="article-excerpt-display"><em>${article.excerpt}</em></div>\n\n`;
+        }
+        
+        if (article.tags && article.tags.length > 0) {
+            const tagsHtml = `<div class="article-tags">${article.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}</div>`;
+            contentWithHeader += `${tagsHtml}\n\n`;
+        }
+        
+        contentWithHeader += article.content.replace(/^#\s+.*$/m, '').trim();
         const htmlContent = marked(contentWithHeader);
         
         // Determine navigation

@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Best Practices - Learning Never Ends</title>
+    <style>
+        
+        :root {
+            --bg: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --primary: #06b6d4;
+            --primary-light: #0891b2;
+            --shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #111827;
+            --text: #f9fafb;
+            --text-light: #d1d5db;
+            --card-bg: #1f2937;
+            --border: #374151;
+            --primary: #0ea5e9;
+            --primary-light: #0284c7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            padding: 1.96rem 0 0.98rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-title {
+            font-size: clamp(2.1rem, 5.6vw, 4.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 0.7rem;
+        }
+
+        .hero-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+        }
+    
+        
+        .article-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .article-post {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .article-post h1:first-child { 
+            font-weight: 800; 
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 0.5rem 0; 
+            line-height: 1.2;
+        }
+
+        .article-post h1:first-child + p em {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .article-excerpt-display {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .article-post h1, .article-post h2 { 
+            font-weight: 700; 
+            margin: 2rem 0 1rem 0; 
+            color: var(--text);
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        }
+
+        .article-post h1:first-child, .article-post h2:first-child { 
+            margin-top: 0; 
+        }
+
+        .article-post p { 
+            margin-bottom: 1.2rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .article-post pre {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        [data-theme="dark"] .article-post pre { 
+            background: #1f2937; 
+        }
+
+        .article-post ul, .article-post ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        .article-post li {
+            margin-bottom: 0.5rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .plantuml-diagram {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .plantuml-diagram img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            padding: 0.5rem;
+        }
+
+        [data-theme="dark"] .plantuml-diagram img {
+            background: #f8fafc;
+        }
+
+        .article-navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+            max-width: 800px;
+        }
+
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            flex: 1;
+            max-width: 48%;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.25);
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.7;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .nav-link.prev {
+            text-align: left;
+        }
+
+        .nav-link.next {
+            text-align: right;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .article-content { 
+                padding: 0 0.5rem; 
+            }
+            
+            .article-post { 
+                margin: 0.5rem; 
+                padding: 1.5rem 1rem; 
+                border-radius: 12px;
+            }
+            
+            .article-navigation {
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 0 0.5rem;
+                margin: 1rem auto;
+            }
+            
+            .nav-link {
+                max-width: 100%;
+                padding: 1rem;
+                text-align: center !important;
+            }
+            
+            .nav-title {
+                font-size: 0.9rem;
+            }
+            
+            .header {
+                padding: 1.05rem 0 0.7rem 0;
+            }
+            
+            .hero-title {
+                font-size: clamp(1.8rem, 8vw, 2.5rem);
+                margin-bottom: 0.5rem;
+            }
+            
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .article-post pre {
+                font-size: 0.8rem;
+                padding: 0.75rem;
+                border-radius: 6px;
+            }
+        }
+
+        /* Small Mobile Devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .article-content {
+                padding: 0 0.25rem;
+            }
+            
+            .article-post {
+                margin: 0.25rem;
+                padding: 1rem 0.75rem;
+            }
+            
+            .nav-link {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .theme-toggle {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="themeToggle" class="theme-toggle">Dark</button>
+    
+    <header class="header">
+        <div class="container">
+            <h1 class="hero-title">
+                <a href="../../index.html">Learning Never Ends</a>
+            </h1>
+        </div>
+    </header>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="09-docker-compose.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Docker Compose for Multi-Container Apps</div>
+            </a>
+            
+            <div></div>
+        </nav>
+    
+
+    <main class="article-content">
+        <article class="article-post">
+            <h1>Docker Best Practices</h1>
+<p><em>February 14, 2026</em></p>
+<div class="article-excerpt-display"><em>Master production-ready Docker practices for security, performance, and maintainability in enterprise environments.</em></div>
+
+<div class="article-tags"><span class="tag">#docker</span><span class="tag">#best-practices</span><span class="tag">#security</span><span class="tag">#production</span></div>
+
+<p>Ready to take your Docker skills to production level? These best practices will help you build secure, efficient, and maintainable containerized applications.</p>
+<h2>Security Best Practices</h2>
+<h3>Use Official Base Images</h3>
+<pre><code class="language-dockerfile">#  GOOD: Official images are maintained and security-scanned
+FROM node:18-alpine
+FROM nginx:alpine  
+FROM postgres:15-alpine
+
+#  AVOID: Unofficial images may have vulnerabilities
+FROM someuser/custom-node
+FROM random-nginx-build
+</code></pre>
+<p><strong>Why official images?</strong></p>
+<ul>
+<li>Regular security updates</li>
+<li>Smaller attack surface</li>
+<li>Proven stability</li>
+<li>Community support</li>
+</ul>
+<h3>Run as Non-Root User</h3>
+<pre><code class="language-dockerfile">#  GOOD: Create and use non-root user
+FROM node:18-alpine
+
+# Create app user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+
+# Set ownership and switch user
+RUN chown -R nodejs:nodejs /app
+USER nodejs
+
+# Now all commands run as nodejs user
+COPY --chown=nodejs:nodejs . /app
+</code></pre>
+<pre><code class="language-dockerfile">#  BAD: Running as root
+FROM node:18-alpine
+COPY . /app
+# Implicitly running as root user
+</code></pre>
+<h3>Minimize Image Attack Surface</h3>
+<pre><code class="language-dockerfile">#  GOOD: Multi-stage build removes build tools
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM node:18-alpine AS production
+RUN addgroup -g 1001 -S nodejs &amp;&amp; adduser -S nodejs -u 1001
+WORKDIR /app
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+COPY --chown=nodejs:nodejs package*.json ./
+USER nodejs
+CMD [&quot;node&quot;, &quot;dist/server.js&quot;]
+</code></pre>
+<h3>Security Scanning</h3>
+<pre><code class="language-bash"># Scan images for vulnerabilities
+docker scout quickview my-app:latest
+docker scout cves my-app:latest
+
+# Use Trivy for comprehensive scanning
+trivy image my-app:latest
+
+# Scan during CI/CD pipeline
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+  aquasec/trivy image my-app:latest
+</code></pre>
+<h2>Image Optimization</h2>
+<h3>Layer Optimization and Caching</h3>
+<pre><code class="language-dockerfile">#  GOOD: Optimize layer caching
+FROM node:18-alpine
+WORKDIR /app
+
+# Copy package.json first (changes less frequently)
+COPY package*.json ./
+RUN npm ci --only=production &amp;&amp; npm cache clean --force
+
+# Copy source code (changes more frequently)
+COPY . .
+
+#  BAD: Poor layer caching
+FROM node:18-alpine
+WORKDIR /app
+COPY . .                    # This invalidates cache for every code change
+RUN npm install
+</code></pre>
+<h3>Minimize Layer Count</h3>
+<pre><code class="language-dockerfile">#  GOOD: Combine related commands
+FROM ubuntu:22.04
+RUN apt-get update &amp;&amp; \
+    apt-get install -y \
+        curl \
+        git \
+        vim &amp;&amp; \
+    apt-get clean &amp;&amp; \
+    rm -rf /var/lib/apt/lists/*
+
+#  BAD: Too many layers
+FROM ubuntu:22.04
+RUN apt-get update
+RUN apt-get install -y curl
+RUN apt-get install -y git  
+RUN apt-get install -y vim
+RUN apt-get clean
+</code></pre>
+<h3>Use .dockerignore</h3>
+<pre><code class="language-dockerfile"># .dockerignore
+node_modules
+npm-debug.log*
+.git
+.gitignore
+README.md
+.env
+.env.local
+coverage/
+.nyc_output
+test/
+docs/
+.docker/
+Dockerfile*
+docker-compose*
+</code></pre>
+<h3>Choose Right Base Images</h3>
+<pre><code class="language-dockerfile"># Size comparison for Node.js app:
+
+#  LARGE: Full Ubuntu base (~200MB)  
+FROM ubuntu:22.04
+RUN apt-get update &amp;&amp; apt-get install -y nodejs npm
+
+#  BETTER: Official Node.js (~150MB)
+FROM node:18
+
+#  BEST: Alpine version (~50MB)
+FROM node:18-alpine
+
+#  OPTIMAL: Distroless for production (~30MB)
+FROM gcr.io/distroless/nodejs18-debian11
+</code></pre>
+<h2>Performance Best Practices</h2>
+<h3>Resource Management</h3>
+<pre><code class="language-yaml"># docker-compose.yml
+services:
+  web:
+    image: my-web-app:latest
+    deploy:
+      resources:
+        limits:
+          cpus: &#39;1.0&#39;
+          memory: 512M
+        reservations:
+          cpus: &#39;0.5&#39;
+          memory: 256M
+    restart: unless-stopped
+</code></pre>
+<pre><code class="language-bash"># Run with resource limits
+docker run -d \
+  --memory=&quot;256m&quot; \
+  --cpus=&quot;0.5&quot; \
+  --name optimized-app \
+  my-app:latest
+</code></pre>
+<h3>Health Checks</h3>
+<pre><code class="language-dockerfile"># Add health check to Dockerfile
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+</code></pre>
+<pre><code class="language-yaml"># Health check in docker-compose.yml
+services:
+  api:
+    image: my-api:latest
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;curl&quot;, &quot;-f&quot;, &quot;http://localhost:3000/health&quot;]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+</code></pre>
+<h3>Logging Best Practices</h3>
+<pre><code class="language-dockerfile"># Configure logging in application
+# Log to STDOUT/STDERR for container compatibility
+RUN ln -sf /dev/stdout /var/log/nginx/access.log &amp;&amp; \
+    ln -sf /dev/stderr /var/log/nginx/error.log
+</code></pre>
+<pre><code class="language-yaml"># Configure log rotation
+services:
+  web:
+    image: nginx:alpine
+    logging:
+      driver: &quot;json-file&quot;
+      options:
+        max-size: &quot;10m&quot;
+        max-file: &quot;3&quot;
+</code></pre>
+<h2>Development Best Practices</h2>
+<h3>Environment Configuration</h3>
+<pre><code class="language-dockerfile">#  GOOD: Use environment variables
+FROM node:18-alpine
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV LOG_LEVEL=info
+
+# Support configuration override
+EXPOSE $PORT
+</code></pre>
+<pre><code class="language-yaml"># Environment-specific overrides
+version: &#39;3.8&#39;
+services:
+  app:
+    image: my-app:latest
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+    env_file:
+      - .env
+      - .env.local
+</code></pre>
+<h3>Secrets Management</h3>
+<pre><code class="language-yaml">#  GOOD: Use Docker secrets (Swarm mode)
+version: &#39;3.8&#39;
+services:
+  app:
+    image: my-app:latest
+    secrets:
+      - db_password
+      - api_key
+    environment:
+      - DB_PASSWORD_FILE=/run/secrets/db_password
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  api_key:
+    external: true
+</code></pre>
+<pre><code class="language-bash">#  AVOID: Hardcoded secrets in Dockerfile
+# Don&#39;t do this:
+ENV API_KEY=super-secret-key-123
+ENV DATABASE_PASSWORD=admin123
+</code></pre>
+<h3>Development vs Production</h3>
+<p><strong>Dockerfile.dev</strong></p>
+<pre><code class="language-dockerfile">FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install  # Include dev dependencies
+COPY . .
+EXPOSE 3000
+CMD [&quot;npm&quot;, &quot;run&quot;, &quot;dev&quot;]
+</code></pre>
+<p><strong>Dockerfile.prod</strong></p>
+<pre><code class="language-dockerfile">FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production &amp;&amp; npm cache clean --force
+COPY . .
+RUN npm run build
+
+FROM node:18-alpine AS production
+RUN addgroup -g 1001 -S nodejs &amp;&amp; adduser -S nodejs -u 1001
+WORKDIR /app
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+USER nodejs
+EXPOSE 3000
+CMD [&quot;node&quot;, &quot;server.js&quot;]
+</code></pre>
+<h2>Production Deployment</h2>
+<h3>Container Orchestration Readiness</h3>
+<pre><code class="language-yaml"># Production-ready docker-compose.yml
+version: &#39;3.8&#39;
+services:
+  web:
+    image: my-web-app:${VERSION:-latest}
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          memory: 512M
+          cpus: &#39;0.5&#39;
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;wget&quot;, &quot;--no-verbose&quot;, &quot;--tries=1&quot;, &quot;--spider&quot;, &quot;http://localhost:3000/health&quot;]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: &quot;json-file&quot;
+      options:
+        max-size: &quot;10m&quot;
+        max-file: &quot;5&quot;
+</code></pre>
+<h3>Graceful Shutdown</h3>
+<pre><code class="language-javascript">// Node.js graceful shutdown example
+process.on(&#39;SIGTERM&#39;, () =&gt; {
+  console.log(&#39;SIGTERM received, shutting down gracefully&#39;);
+  server.close(() =&gt; {
+    console.log(&#39;Process terminated&#39;);
+    process.exit(0);
+  });
+});
+
+process.on(&#39;SIGINT&#39;, () =&gt; {
+  console.log(&#39;SIGINT received, shutting down gracefully&#39;);  
+  server.close(() =&gt; {
+    console.log(&#39;Process terminated&#39;);
+    process.exit(0);
+  });
+});
+</code></pre>
+<pre><code class="language-dockerfile"># Set proper signal handling
+STOPSIGNAL SIGTERM
+</code></pre>
+<h3>Monitoring and Observability</h3>
+<pre><code class="language-dockerfile"># Expose metrics endpoint
+EXPOSE 3000 9090
+ENV METRICS_PORT=9090
+</code></pre>
+<pre><code class="language-yaml"># Monitoring stack
+services:
+  app:
+    image: my-app:latest
+    ports:
+      - &quot;3000:3000&quot;
+      - &quot;9090:9090&quot;  # Metrics
+    
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - &quot;9091:9090&quot;
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - &quot;3001:3000&quot;
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+</code></pre>
+<h2>CI/CD Integration</h2>
+<h3>Multi-Stage Pipeline</h3>
+<pre><code class="language-yaml"># .github/workflows/docker.yml
+name: Docker Build and Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run tests
+        run: |
+          docker build -f Dockerfile.test -t my-app:test .
+          docker run --rm my-app:test npm test
+          
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Build image
+        run: docker build -t my-app:latest .
+        
+      - name: Security scan
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy image my-app:latest
+            
+  build-and-push:
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Build and push
+        run: |
+          docker build -t my-app:${GITHUB_SHA} .
+          docker push my-app:${GITHUB_SHA}
+</code></pre>
+<h3>Image Versioning</h3>
+<pre><code class="language-bash"># Semantic versioning strategy
+docker build -t my-app:1.2.3 .
+docker build -t my-app:1.2 .
+docker build -t my-app:1 .
+docker build -t my-app:latest .
+
+# Git-based versioning
+docker build -t my-app:$(git rev-parse --short HEAD) .
+docker build -t my-app:$(git describe --tags) .
+</code></pre>
+<h2>Maintenance Best Practices</h2>
+<h3>Regular Updates</h3>
+<pre><code class="language-bash">#!/bin/bash
+# update-images.sh - Regular image updates
+
+images=(&quot;nginx:alpine&quot; &quot;node:18-alpine&quot; &quot;postgres:15-alpine&quot;)
+
+for image in &quot;${images[@]}&quot;; do
+    echo &quot;Updating $image...&quot;
+    docker pull &quot;$image&quot;
+done
+
+# Rebuild applications with updated base images
+docker-compose build --no-cache
+docker-compose up -d
+</code></pre>
+<h3>Cleanup Automation</h3>
+<pre><code class="language-bash">#!/bin/bash
+# cleanup.sh - Regular Docker cleanup
+
+# Remove unused containers
+docker container prune -f
+
+# Remove unused images  
+docker image prune -f
+
+# Remove unused volumes (be careful!)
+docker volume prune -f
+
+# Remove unused networks
+docker network prune -f
+
+# Remove build cache
+docker builder prune -f
+
+echo &quot;Docker cleanup completed&quot;
+</code></pre>
+<h3>Monitoring Script</h3>
+<pre><code class="language-bash">#!/bin/bash
+# docker-health-check.sh
+
+services=(&quot;web&quot; &quot;api&quot; &quot;database&quot; &quot;cache&quot;)
+
+for service in &quot;${services[@]}&quot;; do
+    if docker compose ps --services --filter &quot;status=running&quot; | grep -q &quot;$service&quot;; then
+        echo &quot; $service is running&quot;
+    else
+        echo &quot; $service is down - attempting restart&quot;
+        docker compose restart &quot;$service&quot;
+    fi
+done
+
+# Check resource usage
+echo &quot;=== Resource Usage ===&quot;
+docker stats --no-stream --format &quot;table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}&quot;
+</code></pre>
+<h2>Security Hardening Checklist</h2>
+<h3>Image Security</h3>
+<ul>
+<li>Use official base images</li>
+<li>Run as non-root user  </li>
+<li>Scan images for vulnerabilities</li>
+<li>Keep base images updated</li>
+<li>Use multi-stage builds</li>
+<li>Minimize installed packages</li>
+</ul>
+<h3>Runtime Security</h3>
+<ul>
+<li>Set resource limits</li>
+<li>Use read-only filesystems when possible</li>
+<li>Drop unnecessary capabilities</li>
+<li>Use secrets management</li>
+<li>Enable logging and monitoring</li>
+<li>Network segmentation</li>
+</ul>
+<h3>Operational Security</h3>
+<ul>
+<li>Regular security updates</li>
+<li>Monitor container behavior</li>
+<li>Implement proper backup strategies</li>
+<li>Use container image signing</li>
+<li>Audit access controls</li>
+<li>Document security procedures</li>
+</ul>
+<h2>Performance Optimization Checklist</h2>
+<h3>Build Optimization</h3>
+<ul>
+<li>Optimize Dockerfile layer caching</li>
+<li>Use .dockerignore effectively  </li>
+<li>Choose minimal base images</li>
+<li>Combine RUN commands</li>
+<li>Clean package caches</li>
+</ul>
+<h3>Runtime Optimization</h3>
+<ul>
+<li>Set appropriate resource limits</li>
+<li>Configure proper logging</li>
+<li>Implement health checks</li>
+<li>Use volume mounts for persistent data</li>
+<li>Monitor resource usage</li>
+</ul>
+<h3>Application Optimization</h3>
+<ul>
+<li>Optimize application startup time</li>
+<li>Implement graceful shutdown</li>
+<li>Use connection pooling</li>
+<li>Cache static assets</li>
+<li>Monitor application metrics</li>
+</ul>
+<h2>Troubleshooting Common Issues</h2>
+<h3>High Memory Usage</h3>
+<pre><code class="language-bash"># Check memory usage
+docker stats --no-stream
+
+# Set memory limits
+docker run -m 512m my-app:latest
+
+# Monitor memory leaks
+docker exec container-name ps aux --sort=-%mem
+</code></pre>
+<h3>Slow Build Times</h3>
+<pre><code class="language-bash"># Use BuildKit for faster builds
+export DOCKER_BUILDKIT=1
+docker build -t my-app:latest .
+
+# Optimize layer caching
+# Move less frequently changing operations earlier in Dockerfile
+</code></pre>
+<h3>Network Connectivity Issues</h3>
+<pre><code class="language-bash"># Debug network connectivity
+docker network ls
+docker network inspect bridge
+
+# Test container connectivity
+docker exec container1 ping container2
+docker exec container1 nslookup container2
+</code></pre>
+<h2>Conclusion</h2>
+<p>Following these Docker best practices will help you build:</p>
+<ul>
+<li><strong>Secure</strong> applications with minimal attack surface</li>
+<li><strong>Efficient</strong> images with optimal resource usage  </li>
+<li><strong>Maintainable</strong> code with proper CI/CD integration</li>
+<li><strong>Production-ready</strong> deployments with monitoring and logging</li>
+</ul>
+<p>Remember: Start with security, optimize for performance, and always plan for production from day one!</p>
+<h2>Next Steps</h2>
+<p>Congratulations! You&#39;ve completed the Docker Beginner course. You now have solid foundation in:</p>
+<ul>
+<li>Container fundamentals and Docker architecture</li>
+<li>Building and managing custom images</li>
+<li>Container lifecycle management</li>
+<li>Persistent data with volumes</li>
+<li>Container networking and communication</li>
+<li>Multi-container orchestration with Compose</li>
+<li>Production-ready best practices</li>
+</ul>
+<p><strong>Continue your Docker journey:</strong></p>
+<ul>
+<li>Explore Docker Swarm for container orchestration</li>
+<li>Learn Kubernetes for advanced container management</li>
+<li>Study advanced networking and security topics</li>
+<li>Practice with real-world project deployments</li>
+</ul>
+<hr>
+<h2>References</h2>
+<ul>
+<li><a href="https://docs.docker.com/develop/security-best-practices/">Docker Security Best Practices</a></li>
+<li><a href="https://docs.docker.com/develop/dev-best-practices/">Production Best Practices</a></li>
+<li><a href="https://github.com/docker/docker-bench-security">Docker Bench Security</a></li>
+</ul>
+
+        </article>
+    </main>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="09-docker-compose.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Docker Compose for Multi-Container Apps</div>
+            </a>
+            
+            <div></div>
+        </nav>
+    
+
+    <script>
+        
+        let isDark = localStorage.getItem('theme') === 'dark';
+        function setTheme(dark) {
+            isDark = dark; // Update the isDark variable
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            document.getElementById('themeToggle').textContent = dark ? 'Light' : 'Dark';
+        }
+        document.getElementById('themeToggle').addEventListener('click', () => setTheme(!isDark));
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(saved === 'dark' || (!saved && prefersDark));
+    
+    </script>
+</body>
+</html>

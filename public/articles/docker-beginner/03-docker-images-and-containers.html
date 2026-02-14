@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Docker Topic 5 - Learning Never Ends</title>
+    <title>Docker Images and Containers Explained - Learning Never Ends</title>
     <style>
         
         :root {
@@ -48,7 +48,7 @@
         }
 
         .header {
-            padding: 2.8rem 0 1.4rem 0;
+            padding: 1.96rem 0 0.98rem 0;
             text-align: center;
             border-bottom: 1px solid var(--border);
         }
@@ -125,7 +125,43 @@
             font-size: 0.9rem;
             font-weight: 500;
             display: block;
+            margin-bottom: 1rem;
+        }
+
+        .article-excerpt-display {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
             margin-bottom: 2rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
         }
 
         .article-post h1, .article-post h2 { 
@@ -267,7 +303,7 @@
             }
             
             .header {
-                padding: 1.5rem 0 1rem 0;
+                padding: 1.05rem 0 0.7rem 0;
             }
             
             .hero-title {
@@ -329,15 +365,15 @@
     
         <nav class="article-navigation">
             
-            <a href="04-docker-topic-4.html" class="nav-link prev">
+            <a href="02-installing-docker-desktop.html" class="nav-link prev">
                 <div class="nav-label">← Previous</div>
-                <div class="nav-title">Docker Topic 4</div>
+                <div class="nav-title">Installing Docker Desktop</div>
             </a>
             
             
-            <a href="06-docker-topic-6.html" class="nav-link next">
+            <a href="04-running-your-first-web-server.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">Docker Topic 6</div>
+                <div class="nav-title">Running Your First Web Server</div>
             </a>
             
         </nav>
@@ -345,19 +381,179 @@
 
     <main class="article-content">
         <article class="article-post">
-            <h1>Docker Topic 5</h1>
+            <h1>Docker Images and Containers Explained</h1>
 <p><em>February 14, 2026</em></p>
-<p>This chapter explains an important Docker concept in simple terms.</p>
-<p>Practice commands:</p>
-<pre><code class="language-bash">docker ps
+<div class="article-excerpt-display"><em>Master the fundamental concepts of Docker images and containers with practical examples and clear explanations.</em></div>
+
+<div class="article-tags"><span class="tag">#docker</span><span class="tag">#images</span><span class="tag">#containers</span><span class="tag">#fundamentals</span></div>
+
+<p>Understanding the relationship between <strong>images</strong> and <strong>containers</strong> is crucial for mastering Docker. Think of it like this:</p>
+<blockquote>
+<p><strong>Image</strong> = Recipe<br><strong>Container</strong> = Cooked Dish </p>
+</blockquote>
+<h2>What is a Docker Image?</h2>
+<p>A <strong>Docker image</strong> is a lightweight, standalone, executable package that includes:</p>
+<ul>
+<li>Application code</li>
+<li>Runtime environment  </li>
+<li>Libraries and dependencies</li>
+<li>Environment variables</li>
+<li>Configuration files</li>
+</ul>
+<p><strong>Key characteristics:</strong></p>
+<ul>
+<li><strong>Immutable</strong> - Images never change once built</li>
+<li><strong>Layered</strong> - Built in layers for efficiency</li>
+<li><strong>Portable</strong> - Can run on any Docker-enabled system</li>
+</ul>
+<h2>What is a Docker Container?</h2>
+<p>A <strong>container</strong> is a <strong>running instance</strong> of an image. Multiple containers can run from the same image simultaneously.</p>
+<p><strong>Key characteristics:</strong></p>
+<ul>
+<li><strong>Live Process</strong> - Active, running application</li>
+<li><strong>Mutable</strong> - Can be modified while running</li>
+<li><strong>Isolated</strong> - Has its own filesystem, network, and process space</li>
+</ul>
+<h2>Visual Relationship</h2>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/TP0nJyD038Nt-nMFJ31KQfAbwe2AO650Gcn8MTohcvnwvulk78aAyTzHaYBIeVFx_FdPkwoKT0ZUt6d7WR7t0_V9YHfrwXclWLg6HZn7KNB22H_iILsKtBdUc9xiQKIAbsXFKzgwhEbSuDi0bDGToIeAQPryRJqfPor06Muqcv-5uJCE2MzaEoSyZoUsIj9wHl6_lspa_ZqcnMQzMJzCBblUWgi5N5xW2hY5rmkykk3rM79gYzNg4RR45eVvs3J8Cgck4c2PrTTJHg8oacixHJpEqYVlOV-gv4P6XtQCJ84RcLtxGK696x4nz9wL_Hakn_6l1xDZEGp1_m80" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h2>Practical Examples</h2>
+<h3>Example 1: Running NGINX Web Server</h3>
+<pre><code class="language-bash"># Pull the nginx image from Docker Hub
+docker pull nginx:latest
+
+# List downloaded images
 docker images
-docker stop &lt;id&gt;
+
+# Run a container from the nginx image
+docker run -d -p 8080:80 --name my-web-server nginx:latest
+
+# Check running containers
+docker ps
 </code></pre>
-<p>Keep practicing to improve your understanding.</p>
+<p><strong>What happens:</strong></p>
+<ol>
+<li><code>docker pull</code> downloads the nginx image</li>
+<li><code>docker run</code> creates and starts a container from that image</li>
+<li><code>-d</code> runs it in detached mode (background)</li>
+<li><code>-p 8080:80</code> maps port 8080 on your machine to port 80 in container</li>
+<li><code>--name</code> gives the container a friendly name</li>
+</ol>
+<h3>Example 2: Multiple Containers from Same Image</h3>
+<pre><code class="language-bash"># Run multiple nginx containers on different ports
+docker run -d -p 8080:80 --name web1 nginx:latest
+docker run -d -p 8081:80 --name web2 nginx:latest  
+docker run -d -p 8082:80 --name web3 nginx:latest
+
+# All containers run independently
+# Visit http://localhost:8080, http://localhost:8081, http://localhost:8082
+</code></pre>
+<h2>Image Layers Explained</h2>
+<p>Docker images are built in <strong>layers</strong>. Each instruction in a Dockerfile creates a new layer:</p>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/RP0zJmCn38Rt_0hJwHXQLQKi3AW2X5G9mSHsIoxdvi8bJfGum_rxbEIGAfN5yiVZrn-dn39oTbRSyOGEOR0PGpJ4WWrRX3UlPenmTb8ZVCW5On8Yec99sY9iNcHQyprrtqCcpd3Ox_R7-mt818DCU8rN4WuzTMTABAs5Jp_YxYSrdFpu3_xGK_Vgmm91gbdgWdjg3M7Mj_onfuw20zD6hDB1tPAFVyh9vwWGb1-nuIcgQ_pTaBJj2xLyAR4GvJpORf_RuiNKACmQG1HRQy69iaxnYsoAglgh1db6Y4PF3FxIal04NsGNK9CaZIFO-lUU2744zZ0WH1ooiInEI6DszXS0" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><p><strong>Benefits of layering:</strong></p>
+<ul>
+<li><strong>Fast builds</strong> - Only modified layers rebuild</li>
+<li><strong>Storage efficiency</strong> - Layers are shared between images</li>
+<li><strong>Caching</strong> - Docker caches layers for faster subsequent builds</li>
+</ul>
+<h2>Common Docker Commands</h2>
+<h3>Image Commands</h3>
+<pre><code class="language-bash"># List all images
+docker images
+
+# Search for images on Docker Hub
+docker search python
+
+# Pull an image
+docker pull python:3.11
+
+# Remove an image
+docker rmi python:3.11
+
+# Build image from Dockerfile
+docker build -t my-app .
+</code></pre>
+<h3>Container Commands</h3>
+<pre><code class="language-bash"># List running containers
+docker ps
+
+# List all containers (including stopped)
+docker ps -a
+
+# Run a container
+docker run nginx
+
+# Run container in background
+docker run -d nginx
+
+# Run container interactively
+docker run -it ubuntu bash
+
+# Stop a running container
+docker stop container_name
+
+# Start a stopped container
+docker start container_name
+
+# Remove a container
+docker rm container_name
+</code></pre>
+<h2>Container Lifecycle</h2>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/VT2nJiCm40RW_PxYs99NI8PMAXsG652xifZuJsjXdoFV6T6tHsc1fe1OBDcwx_vVNgkvOZL5khCZ4lWbLambY945Y-1D5dD1KFWnZ1XEGmJH6L5tduTN57v8xe2UEd-vbYezTLUtAN06V_Esgo913ZrH6BbvAdc0Ac_5wwfbEqAuEK5RObwWlULfcXSnp-ehBlqaDsY7bDykY5ajJyICgE16yg_XxNjGqsTfFgDuRyxGpXZYmqXBkUWmx_stnQBw7-51AgvVyfrrFjSGNrFy0000" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h2>Hands-On Exercise</h2>
+<p>Try this step-by-step exercise:</p>
+<pre><code class="language-bash"># 1. Pull Ubuntu image
+docker pull ubuntu:latest
+
+# 2. Run Ubuntu container interactively
+docker run -it --name my-ubuntu ubuntu:latest bash
+
+# 3. Inside the container, create a file
+echo &quot;Hello from Docker!&quot; &gt; /tmp/hello.txt
+cat /tmp/hello.txt
+
+# 4. Exit the container
+exit
+
+# 5. Start the container again
+docker start my-ubuntu
+
+# 6. Attach to the running container
+docker attach my-ubuntu
+
+# 7. Check if the file still exists
+cat /tmp/hello.txt
+
+# 8. Exit and clean up
+exit
+docker rm my-ubuntu
+</code></pre>
+<h2>Best Practices</h2>
+<h3>Do&#39;s</h3>
+<ul>
+<li>Use official images when possible</li>
+<li>Keep images small and focused</li>
+<li>Use specific image tags (avoid <code>latest</code> in production)</li>
+<li>Clean up unused containers and images regularly</li>
+</ul>
+<h3>Don&#39;ts</h3>
+<ul>
+<li>Don&#39;t store data in containers (use volumes instead)</li>
+<li>Don&#39;t run multiple services in one container</li>
+<li>Don&#39;t build images with sensitive data</li>
+<li>Don&#39;t ignore security updates</li>
+</ul>
+<h2>What&#39;s Next?</h2>
+<p>Now that you understand images and containers, let&#39;s put this knowledge to practice by running your first web server in the next article!</p>
 <hr>
 <h2>References</h2>
 <ul>
-<li><a href="https://docs.docker.com/">https://docs.docker.com/</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/images/">Docker Images Documentation</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/container/">Docker Containers Guide</a></li>
+<li><a href="https://hub.docker.com/">Docker Hub Registry</a></li>
 </ul>
 
         </article>
@@ -366,15 +562,15 @@ docker stop &lt;id&gt;
     
         <nav class="article-navigation">
             
-            <a href="04-docker-topic-4.html" class="nav-link prev">
+            <a href="02-installing-docker-desktop.html" class="nav-link prev">
                 <div class="nav-label">← Previous</div>
-                <div class="nav-title">Docker Topic 4</div>
+                <div class="nav-title">Installing Docker Desktop</div>
             </a>
             
             
-            <a href="06-docker-topic-6.html" class="nav-link next">
+            <a href="04-running-your-first-web-server.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">Docker Topic 6</div>
+                <div class="nav-title">Running Your First Web Server</div>
             </a>
             
         </nav>
@@ -384,6 +580,7 @@ docker stop &lt;id&gt;
         
         let isDark = localStorage.getItem('theme') === 'dark';
         function setTheme(dark) {
+            isDark = dark; // Update the isDark variable
             document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
             localStorage.setItem('theme', dark ? 'dark' : 'light');
             document.getElementById('themeToggle').textContent = dark ? 'Light' : 'Dark';
