@@ -230,6 +230,11 @@ function getRelativeArticlePath(targetSlug, currentFolder) {
         return `../${targetSlug}.html`;
     }
     
+    // If both are in different subfolders, go up one level then down to target
+    if (targetParts.length > 1 && currentParts.length > 0 && targetParts[0] !== currentParts[0]) {
+        return `../${targetSlug}.html`;
+    }
+    
     // Default case
     return `${targetSlug}.html`;
 }
@@ -636,11 +641,24 @@ async function buildArticles() {
         });
     }
     
-    // Sort articles: first by folder (docker-beginner first), then by order number, then by date
+    // Sort articles: docker-beginner first, kubernetes second, then others by date
     articles.sort((a, b) => {
-        // Group docker-beginner articles first
-        if (a.folder === 'docker-beginner' && b.folder !== 'docker-beginner') return -1;
-        if (a.folder !== 'docker-beginner' && b.folder === 'docker-beginner') return 1;
+        // Define folder priority order
+        const getFolderPriority = (folder) => {
+            switch(folder) {
+                case 'docker-beginner': return 1;
+                case 'kubernetes': return 2;
+                default: return 3;
+            }
+        };
+        
+        const aPriority = getFolderPriority(a.folder);
+        const bPriority = getFolderPriority(b.folder);
+        
+        // If different folder priorities, sort by priority
+        if (aPriority !== bPriority) {
+            return aPriority - bPriority;
+        }
         
         // Within the same folder, sort by order number
         if (a.folder === b.folder) {
@@ -651,7 +669,7 @@ async function buildArticles() {
             return new Date(b.date) - new Date(a.date);
         }
         
-        // Different folders (non-docker), sort by date
+        // Different folders with same priority (shouldn't happen with current logic), sort by date
         return new Date(b.date) - new Date(a.date);
     });
     
@@ -707,9 +725,45 @@ async function buildArticles() {
                 // Next Docker article
                 next = dockerArticles[dockerIndex + 1];
             } else {
-                // Last Docker article - link to next global article
-                const globalIndex = articles.findIndex(a => a.slug === article.slug);
-                next = globalIndex < articles.length - 1 ? articles[globalIndex + 1] : null;
+                // Last Docker article - link to first Kubernetes article to create a complete loop
+                const kubernetesArticles = articles.filter(a => a.folder === 'kubernetes');
+                if (kubernetesArticles.length > 0) {
+                    next = kubernetesArticles[0]; // First Kubernetes article
+                } else {
+                    next = null;
+                }
+            }
+            
+            navigation = { prev, next };
+        } else if (article.folder === 'kubernetes') {
+            // For kubernetes articles, navigate within the same folder sequence, with connection to docker
+            const kubernetesArticles = articles.filter(a => a.folder === 'kubernetes');
+            const kubernetesIndex = kubernetesArticles.findIndex(a => a.slug === article.slug);
+            
+            let prev = null;
+            let next = null;
+            
+            // Previous navigation
+            if (kubernetesIndex > 0) {
+                // Previous Kubernetes article
+                prev = kubernetesArticles[kubernetesIndex - 1];
+            } else {
+                // First Kubernetes article - no previous navigation (independent sequence)
+                prev = null;
+            }
+            
+            // Next navigation
+            if (kubernetesIndex < kubernetesArticles.length - 1) {
+                // Next Kubernetes article
+                next = kubernetesArticles[kubernetesIndex + 1];
+            } else {
+                // Last Kubernetes article - loop back to first Docker article
+                const dockerArticles = articles.filter(a => a.folder === 'docker-beginner');
+                if (dockerArticles.length > 0) {
+                    next = dockerArticles[0]; // First Docker article (What is Docker?)
+                } else {
+                    next = null;
+                }
             }
             
             navigation = { prev, next };

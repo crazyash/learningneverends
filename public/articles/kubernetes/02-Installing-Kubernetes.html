@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installing Kubernetes - Learning Never Ends</title>
+    <style>
+        
+        :root {
+            --bg: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --primary: #06b6d4;
+            --primary-light: #0891b2;
+            --shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #111827;
+            --text: #f9fafb;
+            --text-light: #d1d5db;
+            --card-bg: #1f2937;
+            --border: #374151;
+            --primary: #0ea5e9;
+            --primary-light: #0284c7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            padding: 1.96rem 0 0.98rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-title {
+            font-size: clamp(2.1rem, 5.6vw, 4.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 0.7rem;
+        }
+
+        .hero-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+        }
+
+        /* Footer Styles */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 0.75rem 0;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .footer a:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+
+        /* Better hyperlink visibility in dark mode */
+        [data-theme="dark"] .footer a {
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] .footer a:hover {
+            color: #93c5fd;
+        }
+
+        /* Add bottom padding to body to account for fixed footer */
+        body {
+            padding-bottom: 3rem;
+        }
+
+        /* General hyperlink improvements for better visibility */
+        a {
+            color: var(--primary);
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--primary-light);
+        }
+
+        [data-theme="dark"] a {
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] a:hover {
+            color: #93c5fd;
+        }
+    
+        
+        .article-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .article-post {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .article-post h1:first-child { 
+            font-weight: 800; 
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 0.5rem 0; 
+            line-height: 1.2;
+        }
+
+        .article-post h1:first-child + p em {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .article-excerpt-display {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .article-post h1, .article-post h2 { 
+            font-weight: 700; 
+            margin: 2rem 0 1rem 0; 
+            color: var(--text);
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        }
+
+        .article-post h1:first-child, .article-post h2:first-child { 
+            margin-top: 0; 
+        }
+
+        .article-post p { 
+            margin-bottom: 1.2rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .article-post pre {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        [data-theme="dark"] .article-post pre { 
+            background: #1f2937; 
+        }
+
+        .article-post ul, .article-post ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        .article-post li {
+            margin-bottom: 0.5rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .plantuml-diagram {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .plantuml-diagram img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            padding: 0.5rem;
+        }
+
+        [data-theme="dark"] .plantuml-diagram img {
+            background: #f8fafc;
+        }
+
+        .article-navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+            max-width: 800px;
+        }
+
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            flex: 1;
+            max-width: 48%;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.25);
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.7;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .nav-link.prev {
+            text-align: left;
+        }
+
+        .nav-link.next {
+            text-align: right;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .article-content { 
+                padding: 0 0.5rem; 
+            }
+            
+            .article-post { 
+                margin: 0.5rem; 
+                padding: 1.5rem 1rem; 
+                border-radius: 12px;
+            }
+            
+            .article-navigation {
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 0 0.5rem;
+                margin: 1rem auto;
+            }
+            
+            .nav-link {
+                max-width: 100%;
+                padding: 1rem;
+                text-align: center !important;
+            }
+            
+            .nav-title {
+                font-size: 0.9rem;
+            }
+            
+            .header {
+                padding: 1.05rem 0 0.7rem 0;
+            }
+            
+            .hero-title {
+                font-size: clamp(1.8rem, 8vw, 2.5rem);
+                margin-bottom: 0.5rem;
+            }
+            
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .article-post pre {
+                font-size: 0.8rem;
+                padding: 0.75rem;
+                border-radius: 6px;
+            }
+        }
+
+        /* Small Mobile Devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .article-content {
+                padding: 0 0.25rem;
+            }
+            
+            .article-post {
+                margin: 0.25rem;
+                padding: 1rem 0.75rem;
+            }
+            
+            .nav-link {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .theme-toggle {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="themeToggle" class="theme-toggle">Dark</button>
+    
+    <header class="header">
+        <div class="container">
+            <h1 class="hero-title">
+                <a href="../../index.html">Learning Never Ends</a>
+            </h1>
+        </div>
+    </header>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="01-Introduction-to-Kubernetes.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Introduction to Kubernetes</div>
+            </a>
+            
+            
+            <a href="03-Pods-and-Deployments.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">Pods and Deployments</div>
+            </a>
+            
+        </nav>
+    
+
+    <main class="article-content">
+        <article class="article-post">
+            <h1>Installing Kubernetes</h1>
+<p><em>February 17, 2026</em></p>
+<div class="article-excerpt-display"><em>Complete guide to installing Kubernetes using multiple methods including minikube, kubeadm, and managed services with verification steps.</em></div>
+
+<div class="article-tags"><span class="tag">#kubernetes</span><span class="tag">#installation</span><span class="tag">#minikube</span><span class="tag">#kubeadm</span><span class="tag">#setup</span></div>
+
+<p>Now that you understand what Kubernetes is, let&#39;s get it running! There are several ways to install Kubernetes, each suitable for different use cases. We&#39;ll cover the most popular options and help you choose the right one.</p>
+<h2>Installation Options Overview</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Best For</th>
+<th>Difficulty</th>
+<th>Resource Usage</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Minikube</strong></td>
+<td>Learning &amp; Development</td>
+<td>Easy</td>
+<td>Low (1-2 GB RAM)</td>
+</tr>
+<tr>
+<td><strong>Docker Desktop</strong></td>
+<td>Local Development</td>
+<td>Easy</td>
+<td>Medium (4 GB RAM)</td>
+</tr>
+<tr>
+<td><strong>kubeadm</strong></td>
+<td>Production Clusters</td>
+<td>Medium</td>
+<td>High (8+ GB RAM)</td>
+</tr>
+<tr>
+<td><strong>Managed Services</strong></td>
+<td>Production (Cloud)</td>
+<td>Easy</td>
+<td>Variable</td>
+</tr>
+</tbody></table>
+<h2>Option 1: Minikube (Recommended for Beginners) 🌟</h2>
+<p><strong>Minikube</strong> creates a single-node Kubernetes cluster on your local machine - perfect for learning!</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>2+ CPUs</li>
+<li>2GB+ RAM</li>
+<li>20GB+ disk space</li>
+<li>Container runtime (Docker, Podman, etc.)</li>
+</ul>
+<h3>Install Docker First</h3>
+<pre><code class="language-bash"># Ubuntu/Debian
+sudo apt update
+sudo apt install docker.io -y
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo usermod -aG docker $USER
+
+# macOS (with Homebrew)
+brew install docker
+
+# Windows: Download Docker Desktop from docker.com
+</code></pre>
+<h3>Install Minikube</h3>
+<pre><code class="language-bash"># Linux
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+# macOS
+brew install minikube
+
+# Windows (PowerShell as Administrator)
+winget install minikube
+</code></pre>
+<h3>Install kubectl</h3>
+<pre><code class="language-bash"># Linux
+curl -LO &quot;https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl&quot;
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+
+# macOS
+brew install kubectl
+
+# Windows
+winget install kubectl
+</code></pre>
+<h3>Start Your Cluster</h3>
+<pre><code class="language-bash"># Start minikube
+minikube start
+
+# Verify installation
+kubectl get nodes
+kubectl cluster-info
+
+# Check minikube status
+minikube status
+</code></pre>
+<p><strong>Expected Output:</strong></p>
+<pre><code> minikube v1.32.0 on Ubuntu 20.04
+ Using the docker driver based on existing profile
+👍 Starting control plane node minikube in cluster minikube
+🚜 Pulling base image ...
+ Restarting existing docker container for &quot;minikube&quot; ...
+🐳 Preparing Kubernetes v1.28.3 on Docker 24.0.7 ...
+ Configuring bridge CNI (Container Networking Interface) ...
+🔎 Verifying Kubernetes components...
+🌟 Enabled addons: default-storageclass, storage-provisioner
+🏄 Done! kubectl is now configured to use &quot;minikube&quot; cluster.
+</code></pre>
+<h2>Option 2: Docker Desktop (GUI-Friendly)</h2>
+<p>If you prefer a graphical interface, Docker Desktop includes Kubernetes:</p>
+<h3>Steps</h3>
+<ol>
+<li><strong>Install Docker Desktop</strong> from <a href="https://docker.com">docker.com</a></li>
+<li><strong>Enable Kubernetes</strong>: Settings → Kubernetes → &quot;Enable Kubernetes&quot;</li>
+<li><strong>Apply &amp; Restart</strong>: Wait for installation to complete</li>
+<li><strong>Verify</strong>: Open terminal and run <code>kubectl get nodes</code></li>
+</ol>
+<h2>Option 3: kubeadm (Production-Ready) 🏭</h2>
+<p>For production clusters or learning advanced concepts, use kubeadm:</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Multiple Linux machines (VMs or physical)</li>
+<li>2+ CPUs per machine</li>
+<li>2GB+ RAM per machine</li>
+<li>Network connectivity between machines</li>
+</ul>
+<h3>Install Prerequisites on All Nodes</h3>
+<pre><code class="language-bash"># Update system
+sudo apt update
+
+# Install Docker
+sudo apt install docker.io -y
+sudo systemctl enable docker
+sudo systemctl start docker
+
+# Disable swap (required by Kubernetes)
+sudo swapoff -a
+sudo sed -i &#39;/ swap / s/^\(.*\)$/#\1/g&#39; /etc/fstab
+
+# Install kubeadm, kubelet, kubectl
+sudo apt update
+sudo apt install -y apt-transport-https ca-certificates curl
+
+curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+sudo apt-add-repository &quot;deb http://apt.kubernetes.io/ kubernetes-xenial main&quot;
+
+sudo apt update
+sudo apt install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+</code></pre>
+<h3>Initialize Control Plane (Master Node)</h3>
+<pre><code class="language-bash"># Initialize cluster
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+
+# Set up kubeconfig
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+# Install network plugin (Calico)
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
+</code></pre>
+<h3>Join Worker Nodes</h3>
+<p>After initializing the control plane, you&#39;ll see a join command like:</p>
+<pre><code class="language-bash"># Run this on each worker node
+sudo kubeadm join 192.168.1.100:6443 --token abc123.xyz789 \
+ --discovery-token-ca-cert-hash sha256:hash_value_here
+</code></pre>
+<h2>Option 4: Managed Kubernetes Services</h2>
+<p>For production workloads, consider managed services:</p>
+<h3>Popular Options</h3>
+<ul>
+<li><strong>AWS EKS</strong>: Amazon Elastic Kubernetes Service</li>
+<li><strong>Google GKE</strong>: Google Kubernetes Engine </li>
+<li><strong>Azure AKS</strong>: Azure Kubernetes Service</li>
+<li><strong>DigitalOcean DOKS</strong>: DigitalOcean Kubernetes</li>
+</ul>
+<h3>Example: Creating GKE Cluster</h3>
+<pre><code class="language-bash"># Install gcloud CLI
+curl https://sdk.cloud.google.com | bash
+
+# Authenticate
+gcloud auth login
+
+# Create cluster
+gcloud container clusters create my-cluster \
+ --zone=us-central1-a \
+ --num-nodes=3
+
+# Get credentials
+gcloud container clusters get-credentials my-cluster --zone=us-central1-a
+</code></pre>
+<h2>Verification Steps 🔍</h2>
+<p>Regardless of which method you chose, verify your installation:</p>
+<h3>Basic Verification</h3>
+<pre><code class="language-bash"># Check cluster info
+kubectl cluster-info
+
+# List nodes
+kubectl get nodes
+
+# Check system pods
+kubectl get pods --all-namespaces
+
+# Verify kubectl version
+kubectl version --client --server
+</code></pre>
+<h3>Deploy Test Application</h3>
+<pre><code class="language-bash"># Create a test deployment
+kubectl create deployment hello-k8s --image=nginx
+
+# Expose the deployment
+kubectl expose deployment hello-k8s --port=80 --type=NodePort
+
+# Check the service
+kubectl get services
+
+# Access the application (for minikube)
+minikube service hello-k8s --url
+</code></pre>
+<h3>Architecture Verification</h3>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/VL31JW8n5BptAvvuXQlHFH1aMHEY4R8RzMZATj26qgxjwoR-lTbbYy21sxHlPjwRcGMMdkFUY1k5hRQWwYtFYwhwp5Slgv9ky_lYBd_udnRb-p8lqdG-NnHFSo5apSxJQ84MnZNm8vA155hHIC-wresqJADTtA1cqmy7V4vuN2-fWcy70zdeytFEsU1QzRmEN2DMzJTKD8Dhw5xNwCzn0mC-dcd0r-YvioorXQSoMjPxz49_m1T2eT3IP9hIPmdG5vYiKmWY_KocNVwCkauyVY82YwwGoRJFcr49gQWsCJ0y1POCqHUHX2KuUjkxahPRbzJ7tIL2usp0wKg5DgE53esHlyD1mZe6kHQ-ynqV-ikeY-sTeRMH5YUSeR5nQY2Z3-TtyFJg58IOmQguDty0" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h2>Useful kubectl Commands for Verification</h2>
+<pre><code class="language-bash"># Get detailed node information
+kubectl describe nodes
+
+# Check cluster health
+kubectl get componentstatuses
+
+# Monitor cluster events
+kubectl get events --sort-by=&#39;.lastTimestamp&#39;
+
+# Check available API resources
+kubectl api-resources
+
+# Get cluster configuration
+kubectl config view
+</code></pre>
+<h2>Common Installation Issues &amp; Solutions</h2>
+<h3>Issue: Minikube Won&#39;t Start</h3>
+<pre><code class="language-bash"># Solution: Check Docker and restart minikube
+minikube delete
+minikube start --driver=docker
+</code></pre>
+<h3>Issue: kubectl Command Not Found</h3>
+<pre><code class="language-bash"># Solution: Add kubectl to PATH or install it
+echo &#39;export PATH=$PATH:/usr/local/bin&#39; &gt;&gt; ~/.bashrc
+source ~/.bashrc
+</code></pre>
+<h3>Issue: Network Connectivity Problems</h3>
+<pre><code class="language-bash"># Solution: Check firewall and reset network
+sudo ufw allow 6443/tcp
+minikube delete &amp;&amp; minikube start
+</code></pre>
+<h3>Issue: Insufficient Resources</h3>
+<pre><code class="language-bash"># Solution: Allocate more resources to minikube
+minikube start --memory=4096 --cpus=2
+</code></pre>
+<h2>Post-Installation Setup</h2>
+<h3>Enable Helpful Addons (Minikube)</h3>
+<pre><code class="language-bash"># Enable ingress for advanced networking
+minikube addons enable ingress
+
+# Enable metrics server for resource monitoring 
+minikube addons enable metrics-server
+
+# Enable dashboard for web UI
+minikube addons enable dashboard
+minikube dashboard
+</code></pre>
+<h3>Configure kubectl Auto-completion</h3>
+<pre><code class="language-bash"># For Bash
+echo &#39;source &lt;(kubectl completion bash)&#39; &gt;&gt; ~/.bashrc
+
+# For Zsh
+echo &#39;source &lt;(kubectl completion zsh)&#39; &gt;&gt; ~/.zshrc
+
+# For Fish
+kubectl completion fish | source
+</code></pre>
+<h3>Set up Aliases (Optional but Helpful)</h3>
+<pre><code class="language-bash"># Add to ~/.bashrc or ~/.zshrc
+alias k=kubectl
+alias kgp=&#39;kubectl get pods&#39;
+alias kgs=&#39;kubectl get services&#39;
+alias kgd=&#39;kubectl get deployments&#39;
+</code></pre>
+<h2>What&#39;s Next?</h2>
+<p>Congratulations! You now have a working Kubernetes cluster. In the next article, we&#39;ll explore <strong>Pods and Deployments</strong> - the fundamental building blocks of Kubernetes applications.</p>
+<p>You&#39;ll learn how to:</p>
+<ul>
+<li>Create and manage pods</li>
+<li>Use deployments for scalable applications</li>
+<li>Understand the relationship between pods and containers</li>
+<li>Monitor and troubleshoot your applications</li>
+</ul>
+<h2>Quick Reference</h2>
+<h3>Essential Commands to Remember</h3>
+<pre><code class="language-bash">minikube start # Start local cluster
+kubectl get nodes # List cluster nodes
+kubectl get pods # List running pods
+kubectl cluster-info # Show cluster information
+minikube stop # Stop local cluster
+</code></pre>
+<hr>
+<ul>
+<li><strong>Pro Tip</strong>: Keep your cluster running as you go through this course. Starting and stopping repeatedly can be time-consuming. If you need to free up resources, use <code>minikube pause</code> and <code>minikube unpause</code> instead.*</li>
+</ul>
+
+        </article>
+    </main>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="01-Introduction-to-Kubernetes.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Introduction to Kubernetes</div>
+            </a>
+            
+            
+            <a href="03-Pods-and-Deployments.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">Pods and Deployments</div>
+            </a>
+            
+        </nav>
+    
+
+    <footer class="footer">
+        <div class="container">
+            For feedback or suggestions, send a mail to <a href="mailto:crazyash@live.in">crazyash@live.in</a>
+        </div>
+    </footer>
+
+    <script>
+        
+        let isDark = localStorage.getItem('theme') === 'dark';
+        function setTheme(dark) {
+            isDark = dark; // Update the isDark variable
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            document.getElementById('themeToggle').textContent = dark ? 'Light' : 'Dark';
+        }
+        document.getElementById('themeToggle').addEventListener('click', () => setTheme(!isDark));
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(saved === 'dark' || (!saved && prefersDark));
+    
+    </script>
+</body>
+</html>

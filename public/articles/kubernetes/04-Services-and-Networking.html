@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services and Networking - Learning Never Ends</title>
+    <style>
+        
+        :root {
+            --bg: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --primary: #06b6d4;
+            --primary-light: #0891b2;
+            --shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #111827;
+            --text: #f9fafb;
+            --text-light: #d1d5db;
+            --card-bg: #1f2937;
+            --border: #374151;
+            --primary: #0ea5e9;
+            --primary-light: #0284c7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            padding: 1.96rem 0 0.98rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-title {
+            font-size: clamp(2.1rem, 5.6vw, 4.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 0.7rem;
+        }
+
+        .hero-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+        }
+
+        /* Footer Styles */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 0.75rem 0;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .footer a:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+
+        /* Better hyperlink visibility in dark mode */
+        [data-theme="dark"] .footer a {
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] .footer a:hover {
+            color: #93c5fd;
+        }
+
+        /* Add bottom padding to body to account for fixed footer */
+        body {
+            padding-bottom: 3rem;
+        }
+
+        /* General hyperlink improvements for better visibility */
+        a {
+            color: var(--primary);
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--primary-light);
+        }
+
+        [data-theme="dark"] a {
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] a:hover {
+            color: #93c5fd;
+        }
+    
+        
+        .article-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .article-post {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .article-post h1:first-child { 
+            font-weight: 800; 
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 0.5rem 0; 
+            line-height: 1.2;
+        }
+
+        .article-post h1:first-child + p em {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .article-excerpt-display {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .article-post h1, .article-post h2 { 
+            font-weight: 700; 
+            margin: 2rem 0 1rem 0; 
+            color: var(--text);
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        }
+
+        .article-post h1:first-child, .article-post h2:first-child { 
+            margin-top: 0; 
+        }
+
+        .article-post p { 
+            margin-bottom: 1.2rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .article-post pre {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        [data-theme="dark"] .article-post pre { 
+            background: #1f2937; 
+        }
+
+        .article-post ul, .article-post ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        .article-post li {
+            margin-bottom: 0.5rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .plantuml-diagram {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .plantuml-diagram img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            padding: 0.5rem;
+        }
+
+        [data-theme="dark"] .plantuml-diagram img {
+            background: #f8fafc;
+        }
+
+        .article-navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+            max-width: 800px;
+        }
+
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            flex: 1;
+            max-width: 48%;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.25);
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.7;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .nav-link.prev {
+            text-align: left;
+        }
+
+        .nav-link.next {
+            text-align: right;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .article-content { 
+                padding: 0 0.5rem; 
+            }
+            
+            .article-post { 
+                margin: 0.5rem; 
+                padding: 1.5rem 1rem; 
+                border-radius: 12px;
+            }
+            
+            .article-navigation {
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 0 0.5rem;
+                margin: 1rem auto;
+            }
+            
+            .nav-link {
+                max-width: 100%;
+                padding: 1rem;
+                text-align: center !important;
+            }
+            
+            .nav-title {
+                font-size: 0.9rem;
+            }
+            
+            .header {
+                padding: 1.05rem 0 0.7rem 0;
+            }
+            
+            .hero-title {
+                font-size: clamp(1.8rem, 8vw, 2.5rem);
+                margin-bottom: 0.5rem;
+            }
+            
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .article-post pre {
+                font-size: 0.8rem;
+                padding: 0.75rem;
+                border-radius: 6px;
+            }
+        }
+
+        /* Small Mobile Devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .article-content {
+                padding: 0 0.25rem;
+            }
+            
+            .article-post {
+                margin: 0.25rem;
+                padding: 1rem 0.75rem;
+            }
+            
+            .nav-link {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .theme-toggle {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="themeToggle" class="theme-toggle">Dark</button>
+    
+    <header class="header">
+        <div class="container">
+            <h1 class="hero-title">
+                <a href="../../index.html">Learning Never Ends</a>
+            </h1>
+        </div>
+    </header>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="03-Pods-and-Deployments.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Pods and Deployments</div>
+            </a>
+            
+            
+            <a href="05-ConfigMaps-and-Secrets.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">ConfigMaps and Secrets</div>
+            </a>
+            
+        </nav>
+    
+
+    <main class="article-content">
+        <article class="article-post">
+            <h1>Services and Networking</h1>
+<p><em>February 17, 2026</em></p>
+<div class="article-excerpt-display"><em>Master Kubernetes Services and networking concepts including service types, load balancing, and service discovery for robust application communication.</em></div>
+
+<div class="article-tags"><span class="tag">#kubernetes</span><span class="tag">#services</span><span class="tag">#networking</span><span class="tag">#loadbalancer</span><span class="tag">#dns</span></div>
+
+<p>Your applications are running in pods, but how do you make them accessible? How do pods communicate with each other? Welcome to Kubernetes <strong>Services</strong> - the networking layer that makes everything connect seamlessly!</p>
+<h2>The Networking Challenge 🤔</h2>
+<p>Imagine you have 3 nginx pods running your web application. Without services, you&#39;d face these problems:</p>
+<ul>
+<li><strong>Dynamic IPs</strong>: Pods get new IP addresses when they restart</li>
+<li><strong>No Load Balancing</strong>: Traffic goes to random pods</li>
+<li><strong>Discovery Issues</strong>: How do other pods find your application?</li>
+<li><strong>External Access</strong>: How do users reach your app from outside the cluster?</li>
+</ul>
+<p><strong>Services</strong> solve all these problems!</p>
+<h2>What is a Kubernetes Service?</h2>
+<p>A <strong>Service</strong> is a stable network endpoint that:</p>
+<ul>
+<li>Provides a consistent IP address and DNS name</li>
+<li>Load balances traffic across multiple pods</li>
+<li>Automatically discovers healthy pods</li>
+<li>Enables communication between different parts of your application</li>
+</ul>
+<h3>Service Architecture</h3>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/XP51Ru8m5CVl_HHlxB8TC1OtWnoCqK5ciaG2SIUIfRPF96BBQ35Rbdtt1IOAyx1Zt-_t-lvzdMd3IbCTSd8ZS9j9XDYFNfSB_ssnUbb5S1i4mMJnSARXwgablXiy-kwPh6C_kZJvSzydX76ZIh3M6aiBc8PAOzaH2LU7GacK1gmOosF6CP5tCitaXwr_p_U9N8OUqE5WCXxG0HqszvnWFoiX1UDxbY9OSyRtA0M4IkYceL12Tx9_4UYC3fK0caWwSGPqx5wc54hGAz7fYRGL7RWoHptJQSqH-IQaMOGzFJ_4WmZVAzG6Z4faRmEUEoIjPa-RKE31Ys82DYndagFumvr_-EYA4waCGfcbEmDgswOYO4Dis2P7G2aAbKbJbpgjcKmRwNIzo3HNHom_w-8pijpiWE-Gxskl_ezw324pbA8wv3y0" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h2>Service Types</h2>
+<p>Kubernetes offers four main service types:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Use Case</th>
+<th>Access Method</th>
+<th>Real-World Example</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ClusterIP</strong></td>
+<td>Internal only</td>
+<td>Cluster DNS</td>
+<td>Database, internal APIs</td>
+</tr>
+<tr>
+<td><strong>NodePort</strong></td>
+<td>External access</td>
+<td>Node IP:Port</td>
+<td>Development, testing</td>
+</tr>
+<tr>
+<td><strong>LoadBalancer</strong></td>
+<td>Production external</td>
+<td>Cloud LB</td>
+<td>Production web apps</td>
+</tr>
+<tr>
+<td><strong>ExternalName</strong></td>
+<td>External services</td>
+<td>DNS CNAME</td>
+<td>External databases</td>
+</tr>
+</tbody></table>
+<h2>1. ClusterIP Service (Internal Communication)</h2>
+<p><strong>ClusterIP</strong> is the default service type - only accessible within the cluster.</p>
+<h3>Example: Database Service</h3>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: mysql-deployment
+spec:
+ replicas: 1
+ selector:
+ matchLabels:
+ app: mysql
+ template:
+ metadata:
+ labels:
+ app: mysql
+ spec:
+ containers:
+ - name: mysql
+ image: mysql:8.0
+ env:
+ - name: MYSQL_ROOT_PASSWORD
+ value: &quot;password123&quot;
+ ports:
+ - containerPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: mysql-service
+spec:
+ type: ClusterIP # Default, can be omitted
+ selector:
+ app: mysql
+ ports:
+ - port: 3306
+ targetPort: 3306
+ name: mysql
+</code></pre>
+<h3>Test Internal Connectivity</h3>
+<pre><code class="language-bash"># Apply the configuration
+kubectl apply -f mysql-deployment.yaml
+
+# Create a test pod to connect to MySQL
+kubectl run mysql-client --image=mysql:8.0 -it --rm --restart=Never -- \
+ mysql -h mysql-service -uroot -ppassword123
+
+# Inside the pod, you can connect using the service name!
+# mysql-service resolves to the service IP automatically
+</code></pre>
+<h2>2. NodePort Service (External Access via Node)</h2>
+<p><strong>NodePort</strong> exposes your service on a specific port on every node.</p>
+<h3>Example: Web Application</h3>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: web-deployment
+spec:
+ replicas: 3
+ selector:
+ matchLabels:
+ app: web
+ template:
+ metadata:
+ labels:
+ app: web
+ spec:
+ containers:
+ - name: nginx
+ image: nginx:1.21
+ ports:
+ - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: web-service
+spec:
+ type: NodePort
+ selector:
+ app: web
+ ports:
+ - port: 80 # Service port
+ targetPort: 80 # Pod port
+ nodePort: 30080 # External port (30000-32767)
+ name: http
+</code></pre>
+<h3>Access the Application</h3>
+<pre><code class="language-bash"># Apply the configuration
+kubectl apply -f web-deployment.yaml
+
+# Get service details
+kubectl get services
+
+# For minikube, get the URL
+minikube service web-service --url
+
+# For regular clusters, access via any node IP
+# http://NODE_IP:30080
+</code></pre>
+<h2>3. LoadBalancer Service (Cloud Provider)</h2>
+<p><strong>LoadBalancer</strong> creates an external load balancer (requires cloud provider).</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+ name: web-loadbalancer
+spec:
+ type: LoadBalancer
+ selector:
+ app: web
+ ports:
+ - port: 80
+ targetPort: 80
+ name: http
+</code></pre>
+<h3>Monitor LoadBalancer Creation</h3>
+<pre><code class="language-bash"># Apply the service
+kubectl apply -f web-loadbalancer.yaml
+
+# Watch for external IP assignment
+kubectl get services -w
+
+# Access via external IP (when available)
+# http://EXTERNAL_IP/
+</code></pre>
+<h2>4. ExternalName Service (DNS Alias)</h2>
+<p><strong>ExternalName</strong> creates a DNS alias to external services.</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+ name: external-database
+spec:
+ type: ExternalName
+ externalName: database.example.com
+ ports:
+ - port: 5432
+</code></pre>
+<h2>Service Discovery and DNS 🧭</h2>
+<p>Kubernetes provides automatic DNS resolution for services:</p>
+<h3>DNS Patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Service Location</th>
+<th>DNS Name</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Same namespace</td>
+<td><code>service-name</code></td>
+</tr>
+<tr>
+<td>Different namespace</td>
+<td><code>service-name.namespace-name</code></td>
+</tr>
+<tr>
+<td>Fully qualified</td>
+<td><code>service-name.namespace-name.svc.cluster.local</code></td>
+</tr>
+</tbody></table>
+<h3>Example: Microservices Communication</h3>
+<pre><code class="language-yaml"># Frontend service
+apiVersion: v1
+kind: Service
+metadata:
+ name: frontend
+ namespace: web
+spec:
+ selector:
+ app: frontend
+ ports:
+ - port: 80
+ targetPort: 3000
+---
+# Backend service 
+apiVersion: v1
+kind: Service
+metadata:
+ name: backend
+ namespace: api
+spec:
+ selector:
+ app: backend
+ ports:
+ - port: 8080
+ targetPort: 8080
+</code></pre>
+<h3>Connection Examples</h3>
+<pre><code class="language-bash"># From frontend pod, connect to backend:
+curl http://backend.api:8080/users
+
+# From same namespace:
+curl http://frontend:80
+
+# Fully qualified:
+curl http://backend.api.svc.cluster.local:8080
+</code></pre>
+<h2>Advanced Networking Concepts</h2>
+<h3>Session Affinity</h3>
+<p>Ensure requests from the same client go to the same pod:</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+ name: sticky-service
+spec:
+ selector:
+ app: web
+ ports:
+ - port: 80
+ targetPort: 80
+ sessionAffinity: ClientIP
+ sessionAffinityConfig:
+ clientIP:
+ timeoutSeconds: 3600
+</code></pre>
+<h3>Headless Services</h3>
+<p>Get individual pod IPs instead of load balancing:</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+ name: headless-service
+spec:
+ clusterIP: None # Makes it headless
+ selector:
+ app: database
+ ports:
+ - port: 3306
+ targetPort: 3306
+</code></pre>
+<h3>Service with Multiple Ports</h3>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+ name: multi-port-service
+spec:
+ selector:
+ app: web
+ ports:
+ - name: http
+ port: 80
+ targetPort: 8080
+ - name: https
+ port: 443
+ targetPort: 8443
+ - name: metrics
+ port: 9090
+ targetPort: 9090
+</code></pre>
+<h2>Networking Flow Visualization 🌊</h2>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/VL9DZzem4BtxLqpffJqa8WcLQ0veMN2qg0XGbcrxY5GvyIn413krdTr5A_xxoeam7vLwi-QzD-FtPkwqOSeq-ufyulXS2WJwUqtJnNZ-PxASBrFud2Jqdb87FzBqvsn2psZoVJ9mw6evFI5qc7oZGuSibbCdeb4I9bD2M66aWXvzCwW4g-19e-e1qz1eL3SV8QHcnOvj47e_cXoLG8CQ9bMZZHMz4t3uGd9ismZ9hmQ_4oZalfO2XO7UhidHgvLyExJazdL5A6l3yWergAP2tP9E9G970bVaHrGlPO6P-3ANZD-pYea2rTTCE7UpLGnXF_BxVX14Vj3sqvtgEbNRsPbPIGuBDAzIxNet1YmKP2Be--5Wu0T-qE-CI1wS5_6F8hnK12T5-1z5v1JXnOpeKd4aHqBQhNaZPog6X_Lw1Id-RL2RJ5oOZuTzSg9veovxY26LZK5uALacpjiX7UgDNFeGmxYkgmDKal5Cv6tOfTXqYoAEPZlRC698f7fbYeEHcTWYgypsOA5RQjZzGN1FoRmKjt04CKnBRLIPDwQKWX0X3O8gDri3ylbqGXxyOgROeeRnQjQcWSfMdshExD5UtvL57fZWjc3zWBD3K72m4mYvGy6RVVK1" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h2>Practical Examples</h2>
+<h3>Example 1: Complete Web Application Stack</h3>
+<pre><code class="language-yaml"># Database deployment and service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: postgres
+spec:
+ replicas: 1
+ selector:
+ matchLabels:
+ app: postgres
+ template:
+ metadata:
+ labels:
+ app: postgres
+ spec:
+ containers:
+ - name: postgres
+ image: postgres:13
+ env:
+ - name: POSTGRES_PASSWORD
+ value: &quot;password&quot;
+ ports:
+ - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: postgres-service
+spec:
+ selector:
+ app: postgres
+ ports:
+ - port: 5432
+ targetPort: 5432
+---
+# Web application deployment and service
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+ name: webapp
+spec:
+ replicas: 3
+ selector:
+ matchLabels:
+ app: webapp
+ template:
+ metadata:
+ labels:
+ app: webapp
+ spec:
+ containers:
+ - name: webapp
+ image: nginx:1.21
+ ports:
+ - containerPort: 80
+ env:
+ - name: DB_HOST
+ value: &quot;postgres-service&quot;
+ - name: DB_PORT
+ value: &quot;5432&quot;
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: webapp-service
+spec:
+ type: LoadBalancer
+ selector:
+ app: webapp
+ ports:
+ - port: 80
+ targetPort: 80
+</code></pre>
+<h3>Example 2: Service Health Monitoring</h3>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+ name: healthy-service
+spec:
+ selector:
+ app: webapp
+ ports:
+ - port: 80
+ targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: webapp
+spec:
+ replicas: 3
+ selector:
+ matchLabels:
+ app: webapp
+ template:
+ metadata:
+ labels:
+ app: webapp
+ spec:
+ containers:
+ - name: webapp
+ image: nginx:1.21
+ ports:
+ - containerPort: 80
+ readinessProbe:
+ httpGet:
+ path: /health
+ port: 80
+ initialDelaySeconds: 5
+ periodSeconds: 10
+ livenessProbe:
+ httpGet:
+ path: /health
+ port: 80
+ initialDelaySeconds: 30
+ periodSeconds: 15
+</code></pre>
+<h2>Troubleshooting Services</h2>
+<h3>Common Issues and Solutions</h3>
+<h4>Service Not Accessible</h4>
+<pre><code class="language-bash"># Check if service exists
+kubectl get services
+
+# Verify service endpoints
+kubectl get endpoints
+
+# Check pod labels match service selector
+kubectl get pods --show-labels
+kubectl describe service &lt;service-name&gt;
+</code></pre>
+<h4>No External IP for LoadBalancer</h4>
+<pre><code class="language-bash"># Check if running on cloud provider
+kubectl get nodes -o wide
+
+# For minikube, use tunnel
+minikube tunnel
+
+# Check cloud provider configuration
+kubectl describe service &lt;service-name&gt;
+</code></pre>
+<h4>DNS Resolution Issues</h4>
+<pre><code class="language-bash"># Test DNS from pod
+kubectl run test-pod --image=busybox -it --rm -- \
+ nslookup &lt;service-name&gt;
+
+# Check CoreDNS pods
+kubectl get pods -n kube-system -l k8s-app=kube-dns
+
+# View DNS configuration
+kubectl get configmap coredns -n kube-system -o yaml
+</code></pre>
+<h2>Service Testing Commands</h2>
+<pre><code class="language-bash"># Create test deployment and service
+kubectl create deployment test-app --image=nginx
+kubectl expose deployment test-app --port=80 --target-port=80
+
+# Test different service types
+kubectl patch service test-app -p &#39;{&quot;spec&quot;:{&quot;type&quot;:&quot;NodePort&quot;}}&#39;
+kubectl patch service test-app -p &#39;{&quot;spec&quot;:{&quot;type&quot;:&quot;LoadBalancer&quot;}}&#39;
+
+# View service details
+kubectl get services -o wide
+kubectl describe service test-app
+
+# Test connectivity from pod
+kubectl run test-pod --image=busybox -it --rm -- \
+ wget -qO- test-app:80
+
+# Port forward for local testing
+kubectl port-forward service/test-app 8080:80
+# Then access http://localhost:8080
+</code></pre>
+<h2>Key Networking Commands</h2>
+<pre><code class="language-bash"># Service operations
+kubectl get services
+kubectl describe service &lt;name&gt;
+kubectl delete service &lt;name&gt;
+
+# Endpoint inspection
+kubectl get endpoints
+kubectl describe endpoints &lt;name&gt;
+
+# Network debugging
+kubectl run network-debug --image=busybox -it --rm
+kubectl exec -it &lt;pod&gt; -- netstat -tulpn
+kubectl logs -n kube-system -l component=kube-proxy
+
+# Port forwarding
+kubectl port-forward pod/&lt;pod-name&gt; &lt;local-port&gt;:&lt;pod-port&gt;
+kubectl port-forward service/&lt;service-name&gt; &lt;local-port&gt;:&lt;service-port&gt;
+</code></pre>
+<h2>Key Takeaways</h2>
+<p> <strong>Services</strong> provide stable network endpoints for dynamic pods
+ <strong>ClusterIP</strong> for internal communication, <strong>NodePort</strong> for external access
+ <strong>LoadBalancer</strong> for production external access (cloud required)
+ <strong>DNS service discovery</strong> enables easy pod-to-pod communication
+ <strong>Label selectors</strong> connect services to the right pods
+ <strong>Health checks</strong> ensure traffic only goes to ready pods</p>
+<h2>What&#39;s Next?</h2>
+<p>Excellent! You now understand how to connect and expose your applications in Kubernetes. In the next article, we&#39;ll dive into <strong>ConfigMaps and Secrets</strong> - how to manage configuration data and sensitive information securely.</p>
+<p>You&#39;ll learn how to:</p>
+<ul>
+<li>Store configuration separately from code</li>
+<li>Manage environment-specific settings</li>
+<li>Handle passwords, tokens, and certificates securely</li>
+<li>Update configurations without rebuilding containers</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Pro Tip</strong>: Always use services instead of direct pod IPs. Pods are ephemeral, but services provide stable endpoints that survive pod restarts and scaling operations.*</li>
+</ul>
+
+        </article>
+    </main>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="03-Pods-and-Deployments.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Pods and Deployments</div>
+            </a>
+            
+            
+            <a href="05-ConfigMaps-and-Secrets.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">ConfigMaps and Secrets</div>
+            </a>
+            
+        </nav>
+    
+
+    <footer class="footer">
+        <div class="container">
+            For feedback or suggestions, send a mail to <a href="mailto:crazyash@live.in">crazyash@live.in</a>
+        </div>
+    </footer>
+
+    <script>
+        
+        let isDark = localStorage.getItem('theme') === 'dark';
+        function setTheme(dark) {
+            isDark = dark; // Update the isDark variable
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            document.getElementById('themeToggle').textContent = dark ? 'Light' : 'Dark';
+        }
+        document.getElementById('themeToggle').addEventListener('click', () => setTheme(!isDark));
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(saved === 'dark' || (!saved && prefersDark));
+    
+    </script>
+</body>
+</html>

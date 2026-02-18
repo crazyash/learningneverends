@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaling and Rolling Updates - Learning Never Ends</title>
+    <style>
+        
+        :root {
+            --bg: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --primary: #06b6d4;
+            --primary-light: #0891b2;
+            --shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #111827;
+            --text: #f9fafb;
+            --text-light: #d1d5db;
+            --card-bg: #1f2937;
+            --border: #374151;
+            --primary: #0ea5e9;
+            --primary-light: #0284c7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            padding: 1.96rem 0 0.98rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-title {
+            font-size: clamp(2.1rem, 5.6vw, 4.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 0.7rem;
+        }
+
+        .hero-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+        }
+
+        /* Footer Styles */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 0.75rem 0;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .footer a:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+
+        /* Better hyperlink visibility in dark mode */
+        [data-theme="dark"] .footer a {
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] .footer a:hover {
+            color: #93c5fd;
+        }
+
+        /* Add bottom padding to body to account for fixed footer */
+        body {
+            padding-bottom: 3rem;
+        }
+
+        /* General hyperlink improvements for better visibility */
+        a {
+            color: var(--primary);
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--primary-light);
+        }
+
+        [data-theme="dark"] a {
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] a:hover {
+            color: #93c5fd;
+        }
+    
+        
+        .article-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .article-post {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .article-post h1:first-child { 
+            font-weight: 800; 
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 0.5rem 0; 
+            line-height: 1.2;
+        }
+
+        .article-post h1:first-child + p em {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .article-excerpt-display {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .article-post h1, .article-post h2 { 
+            font-weight: 700; 
+            margin: 2rem 0 1rem 0; 
+            color: var(--text);
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        }
+
+        .article-post h1:first-child, .article-post h2:first-child { 
+            margin-top: 0; 
+        }
+
+        .article-post p { 
+            margin-bottom: 1.2rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .article-post pre {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        [data-theme="dark"] .article-post pre { 
+            background: #1f2937; 
+        }
+
+        .article-post ul, .article-post ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        .article-post li {
+            margin-bottom: 0.5rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .plantuml-diagram {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .plantuml-diagram img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            padding: 0.5rem;
+        }
+
+        [data-theme="dark"] .plantuml-diagram img {
+            background: #f8fafc;
+        }
+
+        .article-navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+            max-width: 800px;
+        }
+
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            flex: 1;
+            max-width: 48%;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.25);
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.7;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .nav-link.prev {
+            text-align: left;
+        }
+
+        .nav-link.next {
+            text-align: right;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .article-content { 
+                padding: 0 0.5rem; 
+            }
+            
+            .article-post { 
+                margin: 0.5rem; 
+                padding: 1.5rem 1rem; 
+                border-radius: 12px;
+            }
+            
+            .article-navigation {
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 0 0.5rem;
+                margin: 1rem auto;
+            }
+            
+            .nav-link {
+                max-width: 100%;
+                padding: 1rem;
+                text-align: center !important;
+            }
+            
+            .nav-title {
+                font-size: 0.9rem;
+            }
+            
+            .header {
+                padding: 1.05rem 0 0.7rem 0;
+            }
+            
+            .hero-title {
+                font-size: clamp(1.8rem, 8vw, 2.5rem);
+                margin-bottom: 0.5rem;
+            }
+            
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .article-post pre {
+                font-size: 0.8rem;
+                padding: 0.75rem;
+                border-radius: 6px;
+            }
+        }
+
+        /* Small Mobile Devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .article-content {
+                padding: 0 0.25rem;
+            }
+            
+            .article-post {
+                margin: 0.25rem;
+                padding: 1rem 0.75rem;
+            }
+            
+            .nav-link {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .theme-toggle {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="themeToggle" class="theme-toggle">Dark</button>
+    
+    <header class="header">
+        <div class="container">
+            <h1 class="hero-title">
+                <a href="../../index.html">Learning Never Ends</a>
+            </h1>
+        </div>
+    </header>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="05-ConfigMaps-and-Secrets.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">ConfigMaps and Secrets</div>
+            </a>
+            
+            
+            <a href="../docker-beginner/01-what-is-docker.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">What is Docker?</div>
+            </a>
+            
+        </nav>
+    
+
+    <main class="article-content">
+        <article class="article-post">
+            <h1>Scaling and Rolling Updates</h1>
+<p><em>February 17, 2026</em></p>
+<div class="article-excerpt-display"><em>Master Kubernetes scaling strategies and rolling updates for zero-downtime deployments, auto-scaling, and efficient resource management.</em></div>
+
+<div class="article-tags"><span class="tag">#kubernetes</span><span class="tag">#scaling</span><span class="tag">#rolling-updates</span><span class="tag">#autoscaling</span><span class="tag">#deployment</span></div>
+
+<p>Your application is live, users are happy, but suddenly traffic spikes 10x during a sale event! Or maybe you need to deploy a critical bug fix without taking the service offline. This is where Kubernetes truly shines with its <strong>scaling</strong> and <strong>rolling update</strong> capabilities.</p>
+<h2>The Scaling Challenge 📈</h2>
+<h3>Traditional Scaling Problems</h3>
+<ul>
+<li><strong>Manual intervention</strong> needed during traffic spikes</li>
+<li><strong>Downtime</strong> required for updates and deployments</li>
+<li><strong>Over-provisioning</strong> resources to handle peak loads</li>
+<li><strong>Slow response</strong> to changing demand</li>
+<li><strong>Risk</strong> of breaking production during updates</li>
+</ul>
+<h3>The Kubernetes Solution</h3>
+<ul>
+<li><strong>Horizontal Pod Autoscaling</strong> based on metrics</li>
+<li><strong>Rolling updates</strong> with zero downtime</li>
+<li><strong>Resource-based scaling</strong> decisions</li>
+<li><strong>Instant response</strong> to load changes</li>
+<li><strong>Rollback capabilities</strong> for failed deployments</li>
+</ul>
+<h2>Horizontal Pod Autoscaling (HPA)</h2>
+<p><strong>HPA</strong> automatically scales the number of pods based on observed CPU utilization, memory usage, or custom metrics.</p>
+<h3>Basic HPA Setup</h3>
+<pre><code class="language-yaml"># First, deploy an application
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: webapp
+spec:
+ replicas: 3
+ selector:
+ matchLabels:
+ app: webapp
+ template:
+ metadata:
+ labels:
+ app: webapp
+ spec:
+ containers:
+ - name: webapp
+ image: nginx:1.21
+ resources:
+ requests:
+ cpu: 100m # Request 100 millicores
+ memory: 128Mi
+ limits:
+ cpu: 200m # Limit to 200 millicores
+ memory: 256Mi
+ ports:
+ - containerPort: 80
+---
+# HPA configuration
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+ name: webapp-hpa
+spec:
+ scaleTargetRef:
+ apiVersion: apps/v1
+ kind: Deployment
+ name: webapp
+ minReplicas: 2 # Minimum pods
+ maxReplicas: 10 # Maximum pods
+ metrics:
+ - type: Resource
+ resource:
+ name: cpu
+ target:
+ type: Utilization
+ averageUtilization: 70 # Scale when avg CPU &gt; 70%
+ - type: Resource 
+ resource:
+ name: memory
+ target:
+ type: Utilization
+ averageUtilization: 80 # Scale when avg memory &gt; 80%
+ behavior:
+ scaleUp:
+ stabilizationWindowSeconds: 60 # Wait 60s before scaling up
+ policies:
+ - type: Percent
+ value: 100 # Increase by 100% (double pods)
+ periodSeconds: 60
+ scaleDown:
+ stabilizationWindowSeconds: 300 # Wait 5 mins before scaling down
+ policies:
+ - type: Percent
+ value: 10 # Decrease by 10%
+ periodSeconds: 60
+</code></pre>
+<h3>Command-Line HPA</h3>
+<pre><code class="language-bash"># Create HPA via command line
+kubectl autoscale deployment webapp --cpu-percent=70 --min=2 --max=10
+
+# View HPA status
+kubectl get hpa
+
+# Describe HPA details
+kubectl describe hpa webapp-hpa
+
+# Watch HPA in real-time
+kubectl get hpa -w
+</code></pre>
+<h3>HPA Scaling Visualization</h3>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/VP7HJi8m58Rl-nH738ack90fHdPXHDZ21Ge1lJQ7xY2DNRkq1UNjpSeOMmGlU_w_FT-NFbc7ncqooIvIMWb5C9aEHX_3wMGwXyiaYP_Zk8eMmy4aFcJnGzAB7wfiDgrknRT9c8mOoz4umKMEoa5heZ65PvIeE9aMe0MvhErgbiUp0GorSaPBMRRNETRtD_ilv8pW5XPajcK_su-QlH7bKkyoKivtKdzalDZ2dT3AGckcK-l3NAVsQCMOqev0Ryc0N7Py6i6hDXbAy6vNeHzsO3XxZ-2ssxvcSWatZysgCxXQ2SvAl29VvnXLbrZXUVDOeaNmWa8v50f2C9HBmT4o5WJ1s_uTMEJYYu8WECqt5f_hakvmGIXk22rPwFqq2SU4srq5wFMhpEFrk-tJtFs_t0kEai1fk3zoxxFQeuRG4To1ecy_gfRAPGHpmdG7AsqgfCBRouoeT3WhNl-OERcDKVQ_tpWX6_REo1R1ITbKVwl2E3nl_4Oc4selxONP4wbqaybV" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h2>Manual Scaling Operations 📏</h2>
+<h3>Quick Scaling Commands</h3>
+<pre><code class="language-bash"># Scale deployment to specific replica count
+kubectl scale deployment webapp --replicas=5
+
+# Scale multiple deployments
+kubectl scale deployment webapp backend-api --replicas=3
+
+# Scale based on current replicas
+kubectl scale --current-replicas=3 --replicas=6 deployment/webapp
+
+# Watch scaling progress
+kubectl rollout status deployment webapp
+</code></pre>
+<h3>Scaling with YAML</h3>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: webapp
+spec:
+ replicas: 8 # Change this value and apply
+ # ... rest of configuration
+</code></pre>
+<pre><code class="language-bash"># Apply scaling change
+kubectl apply -f deployment.yaml
+
+# Or patch directly
+kubectl patch deployment webapp -p &#39;{&quot;spec&quot;:{&quot;replicas&quot;:8}}&#39;
+</code></pre>
+<h2>Rolling Updates</h2>
+<p><strong>Rolling updates</strong> allow you to deploy new versions of your application with zero downtime by gradually replacing old pods with new ones.</p>
+<h3>Rolling Update Process</h3>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/ZPDHQuCm58NVyolkkkTAZMDiFeo2LHYKAhgnbq89pMqRY55CN1cb_tt4pdQMpVfexdUkvv2JgJQiCdKkoHt7ZL08yNos2k9vdC9z50Mp6JrF5k57EmcUmiVW-Jn9qZW8i-oYYxnmGeWHHYAaXPH2RU6zvCmW95MnHgq9gN1jcDfAXD6h4aOm2PbX1aV0D8YVamE1TP6NXK9bO9GK73vTPz8WfRig9B_uxI5fbuGUrBjQUkmOpGoMuFeGL6YpB70FIS4RfJPOkZVyQdUWtO6WTmEaBVXWmVFz_HMA-l26LIwKpHLBtib5R-MYGtFHGNOz2rxizkQY_-QAXEfqQjDy7thMkIk5-q4_feD9xuey4jAMUpn--QcD3wxJbihYPS6NQY_Chbb4Jb2BK_21Eh-kopRsfDYXQlH2GuMCVv4JRvMdz3vu3gHO8ZDGAoFaKZ4fhLf3tJnGJiWK5Qzp-Gq0" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h3>Performing Rolling Updates</h3>
+<h4>Method 1: Update Image</h4>
+<pre><code class="language-bash"># Update container image
+kubectl set image deployment/webapp webapp=webapp:v2.0
+
+# Update multiple containers
+kubectl set image deployment/webapp \
+ webapp=webapp:v2.0 \
+ sidecar=sidecar:v1.5
+
+# Monitor update progress
+kubectl rollout status deployment webapp
+
+# Watch pods during update
+kubectl get pods -l app=webapp -w
+</code></pre>
+<h4>Method 2: Edit Deployment</h4>
+<pre><code class="language-bash"># Edit deployment directly
+kubectl edit deployment webapp
+
+# Change the image in the editor:
+# image: webapp:v1.0 → image: webapp:v2.0
+</code></pre>
+<h4>Method 3: Apply Updated YAML</h4>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: webapp
+spec:
+ replicas: 3
+ strategy:
+ type: RollingUpdate
+ rollingUpdate:
+ maxSurge: 1 # Max extra pods during update
+ maxUnavailable: 1 # Max unavailable pods during update
+ selector:
+ matchLabels:
+ app: webapp
+ template:
+ metadata:
+ labels:
+ app: webapp
+ annotations:
+ # Force update even if only annotations change
+ deployment.kubernetes.io/revision: &quot;2&quot;
+ spec:
+ containers:
+ - name: webapp
+ image: webapp:v2.0 # Updated version
+ ports:
+ - containerPort: 8080
+ readinessProbe:
+ httpGet:
+ path: /health
+ port: 8080
+ initialDelaySeconds: 5
+ periodSeconds: 5
+ livenessProbe:
+ httpGet:
+ path: /health 
+ port: 8080
+ initialDelaySeconds: 30
+ periodSeconds: 10
+</code></pre>
+<h3>Rolling Update Configuration</h3>
+<h4>Update Strategy Types</h4>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: webapp
+spec:
+ strategy:
+ type: RollingUpdate # Default strategy
+ rollingUpdate:
+ maxSurge: 25% # 25% more pods during update
+ maxUnavailable: 25% # 25% pods can be unavailable
+ 
+ # Alternative: Recreate strategy (downtime)
+ # type: Recreate # Kills all pods, then creates new ones
+</code></pre>
+<h4>Advanced Update Control</h4>
+<pre><code class="language-yaml">spec:
+ strategy:
+ type: RollingUpdate
+ rollingUpdate:
+ maxSurge: 2 # Absolute number
+ maxUnavailable: 0 # Zero downtime
+ minReadySeconds: 10 # Wait 10s after pod ready
+ progressDeadlineSeconds: 600 # Fail if update takes &gt; 10 mins
+ revisionHistoryLimit: 10 # Keep 10 old ReplicaSets
+</code></pre>
+<h2>Rollback Operations 🔙</h2>
+<p>When deployments go wrong, Kubernetes makes it easy to roll back to previous versions.</p>
+<h3>Rollback Commands</h3>
+<pre><code class="language-bash"># View rollout history
+kubectl rollout history deployment webapp
+
+# View specific revision details
+kubectl rollout history deployment webapp --revision=3
+
+# Rollback to previous version
+kubectl rollout undo deployment webapp
+
+# Rollback to specific revision
+kubectl rollout undo deployment webapp --to-revision=2
+
+# Monitor rollback progress
+kubectl rollout status deployment webapp
+</code></pre>
+<h3>Example Rollback Scenario</h3>
+<pre><code class="language-bash"># Deploy broken version
+kubectl set image deployment/webapp webapp=webapp:v2.1-broken
+
+# Check deployment status (will show issues)
+kubectl rollout status deployment webapp
+kubectl get pods
+
+# Check what went wrong
+kubectl describe deployment webapp
+kubectl logs -l app=webapp
+
+# Rollback to working version
+kubectl rollout undo deployment webapp
+
+# Verify rollback
+kubectl rollout status deployment webapp
+kubectl get pods
+</code></pre>
+<h2>Advanced Scaling Strategies</h2>
+<h3>Vertical Pod Autoscaling (VPA)</h3>
+<pre><code class="language-yaml">apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+ name: webapp-vpa
+spec:
+ targetRef:
+ apiVersion: apps/v1
+ kind: Deployment
+ name: webapp
+ updatePolicy:
+ updateMode: &quot;Auto&quot; # Auto, Recreate, or Off
+ resourcePolicy:
+ containerPolicies:
+ - containerName: webapp
+ minAllowed:
+ cpu: 100m
+ memory: 128Mi
+ maxAllowed:
+ cpu: 2
+ memory: 4Gi
+ controlledResources: [&quot;cpu&quot;, &quot;memory&quot;]
+</code></pre>
+<h3>Custom Metrics HPA</h3>
+<pre><code class="language-yaml">apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+ name: webapp-custom-hpa
+spec:
+ scaleTargetRef:
+ apiVersion: apps/v1
+ kind: Deployment
+ name: webapp
+ minReplicas: 2
+ maxReplicas: 20
+ metrics:
+ # CPU-based scaling
+ - type: Resource
+ resource:
+ name: cpu
+ target:
+ type: Utilization
+ averageUtilization: 70
+ 
+ # Custom metric: requests per second
+ - type: Pods
+ pods:
+ metric:
+ name: requests_per_second
+ target:
+ type: AverageValue
+ averageValue: &quot;100&quot;
+ 
+ # External metric: queue length
+ - type: External
+ external:
+ metric:
+ name: queue_length
+ selector:
+ matchLabels:
+ queue_name: &quot;work_queue&quot;
+ target:
+ type: Value
+ value: &quot;50&quot;
+</code></pre>
+<h3>Blue-Green Deployment</h3>
+<pre><code class="language-yaml"># Blue deployment (current version)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: webapp-blue
+ labels:
+ version: blue
+spec:
+ replicas: 3
+ selector:
+ matchLabels:
+ app: webapp
+ version: blue
+ template:
+ metadata:
+ labels:
+ app: webapp
+ version: blue
+ spec:
+ containers:
+ - name: webapp
+ image: webapp:v1.0
+ ports:
+ - containerPort: 8080
+---
+# Green deployment (new version)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: webapp-green
+ labels:
+ version: green
+spec:
+ replicas: 3
+ selector:
+ matchLabels:
+ app: webapp
+ version: green
+ template:
+ metadata:
+ labels:
+ app: webapp
+ version: green
+ spec:
+ containers:
+ - name: webapp
+ image: webapp:v2.0
+ ports:
+ - containerPort: 8080
+---
+# Service (switch between blue and green)
+apiVersion: v1
+kind: Service
+metadata:
+ name: webapp-service
+spec:
+ selector:
+ app: webapp
+ version: blue # Switch to &#39;green&#39; when ready
+ ports:
+ - port: 80
+ targetPort: 8080
+</code></pre>
+<h3>Canary Deployment</h3>
+<pre><code class="language-yaml"># Main deployment (90% traffic)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: webapp-stable
+spec:
+ replicas: 9
+ selector:
+ matchLabels:
+ app: webapp
+ track: stable
+ template:
+ metadata:
+ labels:
+ app: webapp
+ track: stable
+ spec:
+ containers:
+ - name: webapp
+ image: webapp:v1.0
+---
+# Canary deployment (10% traffic) 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: webapp-canary
+spec:
+ replicas: 1
+ selector:
+ matchLabels:
+ app: webapp
+ track: canary
+ template:
+ metadata:
+ labels:
+ app: webapp
+ track: canary
+ spec:
+ containers:
+ - name: webapp
+ image: webapp:v2.0
+---
+# Service selects both stable and canary
+apiVersion: v1
+kind: Service
+metadata:
+ name: webapp-service
+spec:
+ selector:
+ app: webapp # Selects both stable and canary
+ ports:
+ - port: 80
+ targetPort: 8080
+</code></pre>
+<h2>Load Testing and Monitoring</h2>
+<h3>Generate Load for Testing</h3>
+<pre><code class="language-bash"># Install hey load testing tool
+go install github.com/rakyll/hey@latest
+
+# Generate load to trigger autoscaling
+hey -z 5m -c 50 http://webapp-service:80/
+
+# Monitor scaling during load test
+kubectl get hpa -w
+kubectl get pods -l app=webapp -w
+kubectl top pods
+</code></pre>
+<h3>Load Test Pod</h3>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Pod
+metadata:
+ name: load-test
+spec:
+ containers:
+ - name: load-test
+ image: busybox
+ command:
+ - sh
+ - -c
+ - |
+ while true; do
+ wget -q -O- http://webapp-service:80/ &gt; /dev/null
+ sleep 0.1
+ done
+ restartPolicy: Never
+</code></pre>
+<h2>Production Best Practices 🏭</h2>
+<h3>Health Checks for Safe Updates</h3>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: webapp
+spec:
+ strategy:
+ type: RollingUpdate
+ rollingUpdate:
+ maxSurge: 1
+ maxUnavailable: 0 # Zero downtime
+ template:
+ spec:
+ containers:
+ - name: webapp
+ image: webapp:v2.0
+ ports:
+ - containerPort: 8080
+ 
+ # Readiness probe - traffic only when ready
+ readinessProbe:
+ httpGet:
+ path: /health/ready
+ port: 8080
+ initialDelaySeconds: 5
+ periodSeconds: 5
+ failureThreshold: 3
+ 
+ # Liveness probe - restart if unhealthy 
+ livenessProbe:
+ httpGet:
+ path: /health/live
+ port: 8080
+ initialDelaySeconds: 30
+ periodSeconds: 15
+ failureThreshold: 3
+ 
+ # Startup probe - for slow-starting apps
+ startupProbe:
+ httpGet:
+ path: /health/startup
+ port: 8080
+ initialDelaySeconds: 10
+ periodSeconds: 10
+ failureThreshold: 30 # Allow 5 minutes to start
+</code></pre>
+<h3>Resource Management</h3>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: webapp
+spec:
+ template:
+ spec:
+ containers:
+ - name: webapp
+ image: webapp:v2.0
+ resources:
+ requests:
+ cpu: 200m # Guaranteed CPU
+ memory: 256Mi # Guaranteed memory
+ limits:
+ cpu: 500m # Max CPU
+ memory: 512Mi # Max memory
+ 
+ # Graceful shutdown
+ lifecycle:
+ preStop:
+ exec:
+ command: [&quot;/bin/sh&quot;, &quot;-c&quot;, &quot;sleep 15&quot;]
+</code></pre>
+<h3>PodDisruptionBudget</h3>
+<pre><code class="language-yaml">apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+ name: webapp-pdb
+spec:
+ minAvailable: 2 # Always keep at least 2 pods running
+ # OR use: maxUnavailable: 1
+ selector:
+ matchLabels:
+ app: webapp
+</code></pre>
+<h2>Troubleshooting Scaling and Updates</h2>
+<h3>Common Issues and Solutions</h3>
+<h4>HPA Not Scaling</h4>
+<pre><code class="language-bash"># Check metrics server is running
+kubectl get pods -n kube-system | grep metrics-server
+
+# Verify resource requests are set
+kubectl describe deployment webapp | grep -A 10 requests
+
+# Check HPA status
+kubectl describe hpa webapp-hpa
+kubectl top pods
+</code></pre>
+<h4>Rolling Update Stuck</h4>
+<pre><code class="language-bash"># Check update status
+kubectl rollout status deployment webapp
+
+# Look for issues
+kubectl describe deployment webapp
+kubectl get events --sort-by=&#39;.metadata.creationTimestamp&#39;
+
+# Check pod issues
+kubectl get pods -l app=webapp
+kubectl describe pod &lt;stuck-pod-name&gt;
+</code></pre>
+<h4>Rollback Issues</h4>
+<pre><code class="language-bash"># Check rollout history
+kubectl rollout history deployment webapp
+
+# Force rollback if needed
+kubectl patch deployment webapp -p \
+ &#39;{&quot;spec&quot;:{&quot;template&quot;:{&quot;metadata&quot;:{&quot;annotations&quot;:{&quot;deployment.kubernetes.io/revision&quot;:&quot;1&quot;}}}}}&#39;
+
+# Delete problematic ReplicaSets
+kubectl delete replicaset &lt;problematic-rs-name&gt;
+</code></pre>
+<h2>Monitoring and Observability 📈</h2>
+<h3>Key Metrics to Watch</h3>
+<pre><code class="language-bash"># CPU and memory usage
+kubectl top nodes
+kubectl top pods
+
+# HPA status
+kubectl get hpa
+
+# Deployment status
+kubectl get deployments
+kubectl rollout status deployment webapp
+
+# Pod lifecycle events
+kubectl get events --field-selector involvedObject.name=webapp
+
+# Resource utilization over time
+kubectl describe node &lt;node-name&gt; | grep -A 10 &quot;Allocated resources&quot;
+</code></pre>
+<h3>Custom Metrics (Prometheus Example)</h3>
+<pre><code class="language-yaml">apiVersion: v1
+kind: ServiceMonitor
+metadata:
+ name: webapp-metrics
+spec:
+ selector:
+ matchLabels:
+ app: webapp
+ endpoints:
+ - port: metrics
+ interval: 30s
+ path: /metrics
+</code></pre>
+<h2>Key Commands Summary</h2>
+<h3>Scaling Commands</h3>
+<pre><code class="language-bash"># Manual scaling
+kubectl scale deployment webapp --replicas=5
+
+# Auto-scaling
+kubectl autoscale deployment webapp --cpu-percent=70 --min=2 --max=10
+
+# View scaling status
+kubectl get hpa
+kubectl top pods
+kubectl describe hpa webapp
+</code></pre>
+<h3>Rolling Update Commands</h3>
+<pre><code class="language-bash"># Update image
+kubectl set image deployment/webapp webapp=webapp:v2.0
+
+# Monitor updates
+kubectl rollout status deployment webapp
+kubectl get pods -l app=webapp -w
+
+# Rollback
+kubectl rollout undo deployment webapp
+kubectl rollout undo deployment webapp --to-revision=2
+
+# History
+kubectl rollout history deployment webapp
+</code></pre>
+<h3>Troubleshooting Commands</h3>
+<pre><code class="language-bash"># Debug scaling issues
+kubectl describe hpa webapp
+kubectl top pods
+kubectl get events
+
+# Debug update issues
+kubectl describe deployment webapp
+kubectl logs -l app=webapp
+kubectl get replicasets
+</code></pre>
+<h2>Key Takeaways</h2>
+<p> <strong>HPA</strong> automatically scales pods based on CPU, memory, or custom metrics
+ <strong>Rolling updates</strong> enable zero-downtime deployments
+ <strong>Rollbacks</strong> provide safety net for failed deployments
+ <strong>Health checks</strong> ensure traffic only goes to ready pods
+ <strong>Resource limits</strong> and PDBs protect cluster stability
+ <strong>Blue-green</strong> and <strong>canary</strong> deployments minimize deployment risk</p>
+<h2>Congratulations! 🎉</h2>
+<p>You&#39;ve completed the Kubernetes essentials course! You now have solid foundational knowledge of:</p>
+<ul>
+<li>Kubernetes architecture and concepts</li>
+<li>Installing and configuring Kubernetes clusters </li>
+<li>Working with Pods and Deployments</li>
+<li>Networking and Services</li>
+<li>Configuration management with ConfigMaps and Secrets</li>
+<li>Scaling and rolling updates</li>
+</ul>
+<h3>What&#39;s Next?</h3>
+<p>Ready to dive deeper? Consider exploring:</p>
+<ul>
+<li><strong>Persistent Volumes</strong> and storage</li>
+<li><strong>Ingress Controllers</strong> for advanced networking</li>
+<li><strong>Helm</strong> for package management</li>
+<li><strong>Operators</strong> for complex application management</li>
+<li><strong>Service Mesh</strong> (Istio/Linkerd) for microservices</li>
+<li><strong>GitOps</strong> with ArgoCD or Flux</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Pro Tip</strong>: Practice these concepts in a development environment before applying them to production. Start with small, incremental changes and always have rollback plans ready.*</li>
+</ul>
+
+        </article>
+    </main>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="05-ConfigMaps-and-Secrets.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">ConfigMaps and Secrets</div>
+            </a>
+            
+            
+            <a href="../docker-beginner/01-what-is-docker.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">What is Docker?</div>
+            </a>
+            
+        </nav>
+    
+
+    <footer class="footer">
+        <div class="container">
+            For feedback or suggestions, send a mail to <a href="mailto:crazyash@live.in">crazyash@live.in</a>
+        </div>
+    </footer>
+
+    <script>
+        
+        let isDark = localStorage.getItem('theme') === 'dark';
+        function setTheme(dark) {
+            isDark = dark; // Update the isDark variable
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            document.getElementById('themeToggle').textContent = dark ? 'Light' : 'Dark';
+        }
+        document.getElementById('themeToggle').addEventListener('click', () => setTheme(!isDark));
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(saved === 'dark' || (!saved && prefersDark));
+    
+    </script>
+</body>
+</html>

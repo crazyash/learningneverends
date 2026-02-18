@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pods and Deployments - Learning Never Ends</title>
+    <style>
+        
+        :root {
+            --bg: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --primary: #06b6d4;
+            --primary-light: #0891b2;
+            --shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #111827;
+            --text: #f9fafb;
+            --text-light: #d1d5db;
+            --card-bg: #1f2937;
+            --border: #374151;
+            --primary: #0ea5e9;
+            --primary-light: #0284c7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            padding: 1.96rem 0 0.98rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-title {
+            font-size: clamp(2.1rem, 5.6vw, 4.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 0.7rem;
+        }
+
+        .hero-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+        }
+
+        /* Footer Styles */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 0.75rem 0;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .footer a:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+
+        /* Better hyperlink visibility in dark mode */
+        [data-theme="dark"] .footer a {
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] .footer a:hover {
+            color: #93c5fd;
+        }
+
+        /* Add bottom padding to body to account for fixed footer */
+        body {
+            padding-bottom: 3rem;
+        }
+
+        /* General hyperlink improvements for better visibility */
+        a {
+            color: var(--primary);
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--primary-light);
+        }
+
+        [data-theme="dark"] a {
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] a:hover {
+            color: #93c5fd;
+        }
+    
+        
+        .article-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .article-post {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .article-post h1:first-child { 
+            font-weight: 800; 
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 0.5rem 0; 
+            line-height: 1.2;
+        }
+
+        .article-post h1:first-child + p em {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .article-excerpt-display {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .article-post h1, .article-post h2 { 
+            font-weight: 700; 
+            margin: 2rem 0 1rem 0; 
+            color: var(--text);
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        }
+
+        .article-post h1:first-child, .article-post h2:first-child { 
+            margin-top: 0; 
+        }
+
+        .article-post p { 
+            margin-bottom: 1.2rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .article-post pre {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        [data-theme="dark"] .article-post pre { 
+            background: #1f2937; 
+        }
+
+        .article-post ul, .article-post ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        .article-post li {
+            margin-bottom: 0.5rem;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+
+        .plantuml-diagram {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .plantuml-diagram img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            padding: 0.5rem;
+        }
+
+        [data-theme="dark"] .plantuml-diagram img {
+            background: #f8fafc;
+        }
+
+        .article-navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+            max-width: 800px;
+        }
+
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            flex: 1;
+            max-width: 48%;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.25);
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.7;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .nav-link.prev {
+            text-align: left;
+        }
+
+        .nav-link.next {
+            text-align: right;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .article-content { 
+                padding: 0 0.5rem; 
+            }
+            
+            .article-post { 
+                margin: 0.5rem; 
+                padding: 1.5rem 1rem; 
+                border-radius: 12px;
+            }
+            
+            .article-navigation {
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 0 0.5rem;
+                margin: 1rem auto;
+            }
+            
+            .nav-link {
+                max-width: 100%;
+                padding: 1rem;
+                text-align: center !important;
+            }
+            
+            .nav-title {
+                font-size: 0.9rem;
+            }
+            
+            .header {
+                padding: 1.05rem 0 0.7rem 0;
+            }
+            
+            .hero-title {
+                font-size: clamp(1.8rem, 8vw, 2.5rem);
+                margin-bottom: 0.5rem;
+            }
+            
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .article-post pre {
+                font-size: 0.8rem;
+                padding: 0.75rem;
+                border-radius: 6px;
+            }
+        }
+
+        /* Small Mobile Devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .article-content {
+                padding: 0 0.25rem;
+            }
+            
+            .article-post {
+                margin: 0.25rem;
+                padding: 1rem 0.75rem;
+            }
+            
+            .nav-link {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .theme-toggle {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="themeToggle" class="theme-toggle">Dark</button>
+    
+    <header class="header">
+        <div class="container">
+            <h1 class="hero-title">
+                <a href="../../index.html">Learning Never Ends</a>
+            </h1>
+        </div>
+    </header>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="02-Installing-Kubernetes.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Installing Kubernetes</div>
+            </a>
+            
+            
+            <a href="04-Services-and-Networking.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">Services and Networking</div>
+            </a>
+            
+        </nav>
+    
+
+    <main class="article-content">
+        <article class="article-post">
+            <h1>Pods and Deployments</h1>
+<p><em>February 17, 2026</em></p>
+<div class="article-excerpt-display"><em>Master Kubernetes Pods and Deployments - the fundamental building blocks for running and managing containerized applications at scale.</em></div>
+
+<div class="article-tags"><span class="tag">#kubernetes</span><span class="tag">#pods</span><span class="tag">#deployments</span><span class="tag">#containers</span><span class="tag">#scaling</span></div>
+
+<p>Now that you have Kubernetes running, let&#39;s dive into the core concepts: <strong>Pods</strong> and <strong>Deployments</strong>. These are the fundamental building blocks that make Kubernetes so powerful for managing containerized applications.</p>
+<h2>Understanding Pods</h2>
+<p>A <strong>Pod</strong> is the smallest deployable unit in Kubernetes. Think of it as a &quot;house&quot; for your containers.</p>
+<h3>Key Pod Concepts</h3>
+<ul>
+<li><strong>Single Responsibility</strong>: Usually contains one main application container</li>
+<li><strong>Shared Network</strong>: All containers in a pod share the same IP address and ports</li>
+<li><strong>Shared Storage</strong>: Containers can share volumes for data exchange </li>
+<li><strong>Lifecycle</strong>: Containers in a pod are created, started, and stopped together</li>
+<li><strong>Ephemeral</strong>: Pods are temporary - they come and go</li>
+</ul>
+<h3>Pod Architecture</h3>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/VL3DIiD04BxFKumLf1vQZA144QbDKmXg4rhnL92bEzqkJMR3xaO5yTqbQTCQ46_3zy-Cd1VMLqKE9vBMcWcpTF8MfK_f74_ZS7eLXmScIcSl3yaidhVyU3o9fsE0KgosGX7sCYDxA1oMHlxA-G9ScQ8qJEonzomqOsJO2yrabzndfVdplF4L3TUjwPWNMj9As8u_DqffLhi4rmh-2za8In9VJLuLrBZUc_ClqOpyXx7R9VUJx1Q3cyjXS1qEWs5miUlZ7G_V0Ctuky7W_W2sOphWKRPlxQZs6B3nX5QhZKUphly9k2X4dfFpMB7sg1aVGmV7JpXqzMHCCZn3vuqLYe1OOXq5C2AMLP7_0000" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h2>Creating Your First Pod</h2>
+<h3>Simple Pod Example</h3>
+<p>Create a file called <code>nginx-pod.yaml</code>:</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Pod
+metadata:
+ name: nginx-pod
+ labels:
+ app: nginx
+ environment: development
+spec:
+ containers:
+ - name: nginx
+ image: nginx:1.21
+ ports:
+ - containerPort: 80
+ name: http
+ resources:
+ requests:
+ memory: &quot;64Mi&quot;
+ cpu: &quot;100m&quot;
+ limits:
+ memory: &quot;128Mi&quot;
+ cpu: &quot;200m&quot;
+</code></pre>
+<h3>Deploy and Examine the Pod</h3>
+<pre><code class="language-bash"># Create the pod
+kubectl apply -f nginx-pod.yaml
+
+# Verify pod is running
+kubectl get pods
+
+# Get detailed information
+kubectl describe pod nginx-pod
+
+# Check pod logs
+kubectl logs nginx-pod
+
+# Execute commands inside the pod
+kubectl exec -it nginx-pod -- /bin/bash
+</code></pre>
+<p><strong>Expected Output:</strong></p>
+<pre><code>NAME READY STATUS RESTARTS AGE
+nginx-pod 1/1 Running 0 30s
+</code></pre>
+<h3>Multi-Container Pod Example</h3>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Pod
+metadata:
+ name: multi-container-pod
+spec:
+ containers:
+ - name: nginx
+ image: nginx:1.21
+ ports:
+ - containerPort: 80
+ volumeMounts:
+ - name: shared-data
+ mountPath: /usr/share/nginx/html
+ 
+ - name: content-generator
+ image: busybox
+ command: [&quot;/bin/sh&quot;]
+ args: [&quot;-c&quot;, &quot;while true; do echo &#39;&lt;h1&gt;Hello from Pod!&lt;/h1&gt;&lt;p&gt;Time: $(date)&lt;/p&gt;&#39; &gt; /data/index.html; sleep 30; done&quot;]
+ volumeMounts:
+ - name: shared-data
+ mountPath: /data
+ 
+ volumes:
+ - name: shared-data
+ emptyDir: {}
+</code></pre>
+<h2>Understanding Deployments</h2>
+<p><strong>Deployments</strong> solve the limitations of bare pods by providing:</p>
+<ul>
+<li><strong>Replication</strong>: Run multiple pod copies</li>
+<li><strong>Self-healing</strong>: Automatically replace failed pods</li>
+<li><strong>Rolling updates</strong>: Update apps with zero downtime</li>
+<li><strong>Rollbacks</strong>: Easily revert to previous versions</li>
+<li><strong>Scaling</strong>: Adjust number of replicas</li>
+</ul>
+<h3>Deployment Architecture</h3>
+<div class="plantuml-diagram">
+                <img src="http://www.plantuml.com/plantuml/svg/RP5FIyD04CNl-od6UWxQXaBfGHIJuA7Iqfw4Want9t5nCnjsDz0gVdVPz8zfwp7pthpVRDwZ3-X2MnjnewZKJ93bYzdyxVrvFfiluROeYZI_FudBrL78XyMuo4_2OfwTb4anpYT2D2W_iI8OPDGOkwk9mm3GW-e-ppdV0gIj6yl40GPSQTucwhIsveoyTgIca8AZncY9VY1-UepbVhgYFSFvlrFFivUh13ToE4hN_2H3YoPcDbPTv2tY92P5gVUwyx25LJ1Sy_vUtCXak_iwRWsldAE-Kr5vT8wkd6dVMNteepEDDnx-Nv8yn6TEeKR6Yhnmlfj5D4n1Ei90_gwsh8DrVNdqZmmzFVrlNR0D14vN7m5iUIXHG08PIOEEOgzTH-031ehAw_um-El6n_4BiZBaeMrKXt3Mc0tAJo-85KJC9SnrUpdxDd8Qgq3QbaCSncoKvA54RKXrTVNPqMnqIN8d3VK0ZyIghSql" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
+            </div><h2>Creating Your First Deployment</h2>
+<h3>Basic Deployment</h3>
+<p>Create <code>nginx-deployment.yaml</code>:</p>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: nginx-deployment
+ labels:
+ app: nginx
+spec:
+ replicas: 3
+ selector:
+ matchLabels:
+ app: nginx
+ template:
+ metadata:
+ labels:
+ app: nginx
+ spec:
+ containers:
+ - name: nginx
+ image: nginx:1.21
+ ports:
+ - containerPort: 80
+ resources:
+ requests:
+ memory: &quot;64Mi&quot;
+ cpu: &quot;100m&quot;
+ limits:
+ memory: &quot;128Mi&quot;
+ cpu: &quot;200m&quot;
+ livenessProbe:
+ httpGet:
+ path: /
+ port: 80
+ initialDelaySeconds: 30
+ periodSeconds: 10
+ readinessProbe:
+ httpGet:
+ path: /
+ port: 80
+ initialDelaySeconds: 5
+ periodSeconds: 5
+</code></pre>
+<h3>Deploy and Manage</h3>
+<pre><code class="language-bash"># Create deployment
+kubectl apply -f nginx-deployment.yaml
+
+# Check deployment status
+kubectl get deployments
+
+# View replica sets
+kubectl get replicasets
+
+# List all pods created by deployment
+kubectl get pods -l app=nginx
+
+# Watch pods in real-time
+kubectl get pods -l app=nginx -w
+</code></pre>
+<h3>Scaling Operations</h3>
+<pre><code class="language-bash"># Scale up to 5 replicas
+kubectl scale deployment nginx-deployment --replicas=5
+
+# Scale down to 2 replicas 
+kubectl scale deployment nginx-deployment --replicas=2
+
+# Check scaling progress
+kubectl rollout status deployment nginx-deployment
+
+# Auto-scale based on CPU usage (requires metrics server)
+kubectl autoscale deployment nginx-deployment --cpu-percent=50 --min=2 --max=10
+</code></pre>
+<h2>Advanced Deployment Strategies</h2>
+<h3>Rolling Updates</h3>
+<pre><code class="language-bash"># Update to newer nginx version
+kubectl set image deployment nginx-deployment nginx=nginx:1.22
+
+# Monitor update progress
+kubectl rollout status deployment nginx-deployment
+
+# View rollout history
+kubectl rollout history deployment nginx-deployment
+
+# Rollback to previous version
+kubectl rollout undo deployment nginx-deployment
+
+# Rollback to specific revision
+kubectl rollout undo deployment nginx-deployment --to-revision=1
+</code></pre>
+<h3>Update Strategy Configuration</h3>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: nginx-deployment
+spec:
+ replicas: 6
+ strategy:
+ type: RollingUpdate
+ rollingUpdate:
+ maxSurge: 2 # Max extra pods during update
+ maxUnavailable: 1 # Max unavailable pods during update
+ # ... rest of spec
+</code></pre>
+<h3>Blue-Green Deployment Example</h3>
+<pre><code class="language-yaml"># Green version (current)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: nginx-green
+spec:
+ replicas: 3
+ selector:
+ matchLabels:
+ app: nginx
+ version: green
+ template:
+ metadata:
+ labels:
+ app: nginx
+ version: green
+ spec:
+ containers:
+ - name: nginx
+ image: nginx:1.21
+ ports:
+ - containerPort: 80
+---
+# Blue version (new)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: nginx-blue
+spec:
+ replicas: 3
+ selector:
+ matchLabels:
+ app: nginx
+ version: blue
+ template:
+ metadata:
+ labels:
+ app: nginx
+ version: blue
+ spec:
+ containers:
+ - name: nginx
+ image: nginx:1.22
+ ports:
+ - containerPort: 80
+</code></pre>
+<h2>Practical Exercises</h2>
+<h3>Exercise 1: Debug a Failed Pod</h3>
+<pre><code class="language-bash"># Create a pod with wrong image
+kubectl run broken-pod --image=nginx:nonexistent
+
+# Diagnose the issue
+kubectl get pods
+kubectl describe pod broken-pod
+kubectl logs broken-pod
+
+# Fix the issue
+kubectl delete pod broken-pod
+kubectl run fixed-pod --image=nginx:1.21
+</code></pre>
+<h3>Exercise 2: Deployment Health Check</h3>
+<pre><code class="language-bash"># Create deployment with health checks
+kubectl apply -f nginx-deployment.yaml
+
+# Simulate a container crash
+kubectl exec -it $(kubectl get pods -l app=nginx -o name | head -1) -- pkill nginx
+
+# Watch Kubernetes recover the pod
+kubectl get pods -l app=nginx -w
+</code></pre>
+<h3>Exercise 3: Resource Management</h3>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: resource-demo
+spec:
+ replicas: 2
+ selector:
+ matchLabels:
+ app: resource-demo
+ template:
+ metadata:
+ labels:
+ app: resource-demo
+ spec:
+ containers:
+ - name: stress-test
+ image: busybox
+ command: [&quot;sh&quot;, &quot;-c&quot;, &quot;while true; do echo &#39;Working...&#39;; sleep 10; done&quot;]
+ resources:
+ requests:
+ memory: &quot;100Mi&quot;
+ cpu: &quot;100m&quot;
+ limits:
+ memory: &quot;200Mi&quot;
+ cpu: &quot;200m&quot;
+</code></pre>
+<h2>Common Commands Cheat Sheet</h2>
+<h3>Pod Commands</h3>
+<pre><code class="language-bash"># Create pod from YAML
+kubectl apply -f pod.yaml
+
+# Get pods
+kubectl get pods
+kubectl get pods -o wide
+kubectl get pods --show-labels
+
+# Describe pod
+kubectl describe pod &lt;pod-name&gt;
+
+# Delete pod
+kubectl delete pod &lt;pod-name&gt;
+kubectl delete -f pod.yaml
+</code></pre>
+<h3>Deployment Commands</h3>
+<pre><code class="language-bash"># Create deployment
+kubectl create deployment &lt;name&gt; --image=&lt;image&gt;
+kubectl apply -f deployment.yaml
+
+# Get deployments
+kubectl get deployments
+kubectl get deploy -o wide
+
+# Scale deployment
+kubectl scale deployment &lt;name&gt; --replicas=&lt;count&gt;
+
+# Update deployment
+kubectl set image deployment &lt;name&gt; &lt;container&gt;=&lt;new-image&gt;
+
+# Rollback deployment
+kubectl rollout undo deployment &lt;name&gt;
+
+# Delete deployment
+kubectl delete deployment &lt;name&gt;
+</code></pre>
+<h2>Troubleshooting Common Issues</h2>
+<h3>Pod Stuck in Pending State</h3>
+<pre><code class="language-bash"># Check resource constraints
+kubectl describe pod &lt;pod-name&gt;
+kubectl top nodes
+kubectl get nodes -o wide
+
+# Check events
+kubectl get events --sort-by=&#39;.metadata.creationTimestamp&#39;
+</code></pre>
+<h3>Pod Crash Loop</h3>
+<pre><code class="language-bash"># Check logs
+kubectl logs &lt;pod-name&gt; --previous
+
+# Check pod events
+kubectl describe pod &lt;pod-name&gt;
+
+# Debug with different image
+kubectl run debug-pod --image=busybox -it --rm
+</code></pre>
+<h3>Image Pull Errors</h3>
+<pre><code class="language-bash"># Verify image exists
+docker pull &lt;image-name&gt;
+
+# Check imagePullSecrets
+kubectl describe pod &lt;pod-name&gt;
+
+# Check node connectivity
+kubectl get nodes
+</code></pre>
+<h2>Key Takeaways</h2>
+<p> <strong>Pods</strong> are the smallest unit in Kubernetes - usually contain one container
+ <strong>Deployments</strong> manage pods with replication, scaling, and updates
+ <strong>ReplicaSets</strong> ensure desired number of pod replicas (managed by Deployments)
+ <strong>Rolling updates</strong> allow zero-downtime deployments
+ <strong>Health checks</strong> ensure containers are ready and healthy
+ <strong>Resource limits</strong> prevent containers from consuming too many resources</p>
+<h2>What&#39;s Next?</h2>
+<p>Great job! You now understand how to deploy and manage applications with Pods and Deployments. In the next article, we&#39;ll explore <strong>Services and Networking</strong> - how to make your applications accessible and enable communication between different parts of your system.</p>
+<p>You&#39;ll learn about:</p>
+<ul>
+<li>Service types (ClusterIP, NodePort, LoadBalancer)</li>
+<li>Service discovery and DNS</li>
+<li>Load balancing</li>
+<li>Network policies</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Pro Tip</strong>: Always use Deployments instead of bare Pods in production. Deployments provide self-healing, scaling, and update capabilities that bare Pods lack.*</li>
+</ul>
+
+        </article>
+    </main>
+
+    
+        <nav class="article-navigation">
+            
+            <a href="02-Installing-Kubernetes.html" class="nav-link prev">
+                <div class="nav-label">← Previous</div>
+                <div class="nav-title">Installing Kubernetes</div>
+            </a>
+            
+            
+            <a href="04-Services-and-Networking.html" class="nav-link next">
+                <div class="nav-label">Next →</div>
+                <div class="nav-title">Services and Networking</div>
+            </a>
+            
+        </nav>
+    
+
+    <footer class="footer">
+        <div class="container">
+            For feedback or suggestions, send a mail to <a href="mailto:crazyash@live.in">crazyash@live.in</a>
+        </div>
+    </footer>
+
+    <script>
+        
+        let isDark = localStorage.getItem('theme') === 'dark';
+        function setTheme(dark) {
+            isDark = dark; // Update the isDark variable
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            document.getElementById('themeToggle').textContent = dark ? 'Light' : 'Dark';
+        }
+        document.getElementById('themeToggle').addEventListener('click', () => setTheme(!isDark));
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(saved === 'dark' || (!saved && prefersDark));
+    
+    </script>
+</body>
+</html>
