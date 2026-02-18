@@ -448,7 +448,7 @@
 <div class="article-tags"><span class="tag">#kubernetes</span><span class="tag">#services</span><span class="tag">#networking</span><span class="tag">#loadbalancer</span><span class="tag">#dns</span></div>
 
 <p>Your applications are running in pods, but how do you make them accessible? How do pods communicate with each other? Welcome to Kubernetes <strong>Services</strong> - the networking layer that makes everything connect seamlessly!</p>
-<h2>The Networking Challenge 🤔</h2>
+<h2>The Networking Challenge</h2>
 <p>Imagine you have 3 nginx pods running your web application. Without services, you&#39;d face these problems:</p>
 <ul>
 <li><strong>Dynamic IPs</strong>: Pods get new IP addresses when they restart</li>
@@ -641,7 +641,7 @@ spec:
  ports:
  - port: 5432
 </code></pre>
-<h2>Service Discovery and DNS 🧭</h2>
+<h2>Service Discovery and DNS</h2>
 <p>Kubernetes provides automatic DNS resolution for services:</p>
 <h3>DNS Patterns</h3>
 <table>
@@ -752,7 +752,7 @@ spec:
  port: 9090
  targetPort: 9090
 </code></pre>
-<h2>Networking Flow Visualization 🌊</h2>
+<h2>Networking Flow Visualization</h2>
 <div class="plantuml-diagram">
                 <img src="http://www.plantuml.com/plantuml/svg/VL9DZzem4BtxLqpffJqa8WcLQ0veMN2qg0XGbcrxY5GvyIn413krdTr5A_xxoeam7vLwi-QzD-FtPkwqOSeq-ufyulXS2WJwUqtJnNZ-PxASBrFud2Jqdb87FzBqvsn2psZoVJ9mw6evFI5qc7oZGuSibbCdeb4I9bD2M66aWXvzCwW4g-19e-e1qz1eL3SV8QHcnOvj47e_cXoLG8CQ9bMZZHMz4t3uGd9ismZ9hmQ_4oZalfO2XO7UhidHgvLyExJazdL5A6l3yWergAP2tP9E9G970bVaHrGlPO6P-3ANZD-pYea2rTTCE7UpLGnXF_BxVX14Vj3sqvtgEbNRsPbPIGuBDAzIxNet1YmKP2Be--5Wu0T-qE-CI1wS5_6F8hnK12T5-1z5v1JXnOpeKd4aHqBQhNaZPog6X_Lw1Id-RL2RJ5oOZuTzSg9veovxY26LZK5uALacpjiX7UgDNFeGmxYkgmDKal5Cv6tOfTXqYoAEPZlRC698f7fbYeEHcTWYgypsOA5RQjZzGN1FoRmKjt04CKnBRLIPDwQKWX0X3O8gDri3ylbqGXxyOgROeeRnQjQcWSfMdshExD5UtvL57fZWjc3zWBD3K72m4mYvGy6RVVK1" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
             </div><h2>Practical Examples</h2>

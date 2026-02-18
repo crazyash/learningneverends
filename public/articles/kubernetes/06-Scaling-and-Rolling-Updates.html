@@ -448,7 +448,7 @@
 <div class="article-tags"><span class="tag">#kubernetes</span><span class="tag">#scaling</span><span class="tag">#rolling-updates</span><span class="tag">#autoscaling</span><span class="tag">#deployment</span></div>
 
 <p>Your application is live, users are happy, but suddenly traffic spikes 10x during a sale event! Or maybe you need to deploy a critical bug fix without taking the service offline. This is where Kubernetes truly shines with its <strong>scaling</strong> and <strong>rolling update</strong> capabilities.</p>
-<h2>The Scaling Challenge 📈</h2>
+<h2>The Scaling Challenge</h2>
 <h3>Traditional Scaling Problems</h3>
 <ul>
 <li><strong>Manual intervention</strong> needed during traffic spikes</li>
@@ -551,7 +551,7 @@ kubectl get hpa -w
 <h3>HPA Scaling Visualization</h3>
 <div class="plantuml-diagram">
                 <img src="http://www.plantuml.com/plantuml/svg/VP7HJi8m58Rl-nH738ack90fHdPXHDZ21Ge1lJQ7xY2DNRkq1UNjpSeOMmGlU_w_FT-NFbc7ncqooIvIMWb5C9aEHX_3wMGwXyiaYP_Zk8eMmy4aFcJnGzAB7wfiDgrknRT9c8mOoz4umKMEoa5heZ65PvIeE9aMe0MvhErgbiUp0GorSaPBMRRNETRtD_ilv8pW5XPajcK_su-QlH7bKkyoKivtKdzalDZ2dT3AGckcK-l3NAVsQCMOqev0Ryc0N7Py6i6hDXbAy6vNeHzsO3XxZ-2ssxvcSWatZysgCxXQ2SvAl29VvnXLbrZXUVDOeaNmWa8v50f2C9HBmT4o5WJ1s_uTMEJYYu8WECqt5f_hakvmGIXk22rPwFqq2SU4srq5wFMhpEFrk-tJtFs_t0kEai1fk3zoxxFQeuRG4To1ecy_gfRAPGHpmdG7AsqgfCBRouoeT3WhNl-OERcDKVQ_tpWX6_REo1R1ITbKVwl2E3nl_4Oc4selxONP4wbqaybV" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
-            </div><h2>Manual Scaling Operations 📏</h2>
+            </div><h2>Manual Scaling Operations</h2>
 <h3>Quick Scaling Commands</h3>
 <pre><code class="language-bash"># Scale deployment to specific replica count
 kubectl scale deployment webapp --replicas=5
@@ -676,7 +676,7 @@ spec:
  progressDeadlineSeconds: 600 # Fail if update takes &gt; 10 mins
  revisionHistoryLimit: 10 # Keep 10 old ReplicaSets
 </code></pre>
-<h2>Rollback Operations 🔙</h2>
+<h2>Rollback Operations</h2>
 <p>When deployments go wrong, Kubernetes makes it easy to roll back to previous versions.</p>
 <h3>Rollback Commands</h3>
 <pre><code class="language-bash"># View rollout history
@@ -930,7 +930,7 @@ spec:
  done
  restartPolicy: Never
 </code></pre>
-<h2>Production Best Practices 🏭</h2>
+<h2>Production Best Practices</h2>
 <h3>Health Checks for Safe Updates</h3>
 <pre><code class="language-yaml">apiVersion: apps/v1
 kind: Deployment
@@ -1050,7 +1050,7 @@ kubectl patch deployment webapp -p \
 # Delete problematic ReplicaSets
 kubectl delete replicaset &lt;problematic-rs-name&gt;
 </code></pre>
-<h2>Monitoring and Observability 📈</h2>
+<h2>Monitoring and Observability</h2>
 <h3>Key Metrics to Watch</h3>
 <pre><code class="language-bash"># CPU and memory usage
 kubectl top nodes
@@ -1129,7 +1129,7 @@ kubectl get replicasets
  <strong>Health checks</strong> ensure traffic only goes to ready pods
  <strong>Resource limits</strong> and PDBs protect cluster stability
  <strong>Blue-green</strong> and <strong>canary</strong> deployments minimize deployment risk</p>
-<h2>Congratulations! 🎉</h2>
+<h2>Congratulations!</h2>
 <p>You&#39;ve completed the Kubernetes essentials course! You now have solid foundational knowledge of:</p>
 <ul>
 <li>Kubernetes architecture and concepts</li>

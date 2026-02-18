@@ -19,7 +19,7 @@ Now that you understand what Kubernetes is, let's get it running! There are seve
 | **kubeadm** | Production Clusters | Medium | High (8+ GB RAM) |
 | **Managed Services** | Production (Cloud) | Easy | Variable |
 
-## Option 1: Minikube (Recommended for Beginners) 🌟
+## Option 1: Minikube (Recommended for Beginners)
 
 **Minikube** creates a single-node Kubernetes cluster on your local machine - perfect for learning!
 
@@ -112,7 +112,7 @@ If you prefer a graphical interface, Docker Desktop includes Kubernetes:
 3. **Apply & Restart**: Wait for installation to complete
 4. **Verify**: Open terminal and run `kubectl get nodes`
 
-## Option 3: kubeadm (Production-Ready) 🏭
+## Option 3: kubeadm (Production-Ready)
 
 For production clusters or learning advanced concepts, use kubeadm:
 

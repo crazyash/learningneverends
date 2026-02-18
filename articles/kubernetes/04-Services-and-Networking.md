@@ -10,7 +10,7 @@ tags: ["kubernetes", "services", "networking", "loadbalancer", "dns"]
 
 Your applications are running in pods, but how do you make them accessible? How do pods communicate with each other? Welcome to Kubernetes **Services** - the networking layer that makes everything connect seamlessly!
 
-## The Networking Challenge 🤔
+## The Networking Challenge
 
 Imagine you have 3 nginx pods running your web application. Without services, you'd face these problems:
 
@@ -236,7 +236,7 @@ spec:
  - port: 5432
 ```
 
-## Service Discovery and DNS 🧭
+## Service Discovery and DNS
 
 Kubernetes provides automatic DNS resolution for services:
 
@@ -354,7 +354,7 @@ spec:
  targetPort: 9090
 ```
 
-## Networking Flow Visualization 🌊
+## Networking Flow Visualization
 
 ```plantuml
 @startuml

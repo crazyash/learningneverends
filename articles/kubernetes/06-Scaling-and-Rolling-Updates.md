@@ -10,7 +10,7 @@ tags: ["kubernetes", "scaling", "rolling-updates", "autoscaling", "deployment"]
 
 Your application is live, users are happy, but suddenly traffic spikes 10x during a sale event! Or maybe you need to deploy a critical bug fix without taking the service offline. This is where Kubernetes truly shines with its **scaling** and **rolling update** capabilities.
 
-## The Scaling Challenge 📈
+## The Scaling Challenge
 
 ### Traditional Scaling Problems
 - **Manual intervention** needed during traffic spikes
@@ -158,7 +158,7 @@ deploy -> pods: Terminate 4 pods
 @enduml
 ```
 
-## Manual Scaling Operations 📏
+## Manual Scaling Operations
 
 ### Quick Scaling Commands
 
@@ -351,7 +351,7 @@ spec:
  revisionHistoryLimit: 10 # Keep 10 old ReplicaSets
 ```
 
-## Rollback Operations 🔙
+## Rollback Operations
 
 When deployments go wrong, Kubernetes makes it easy to roll back to previous versions.
 
@@ -633,7 +633,7 @@ spec:
  restartPolicy: Never
 ```
 
-## Production Best Practices 🏭
+## Production Best Practices
 
 ### Health Checks for Safe Updates
 
@@ -774,7 +774,7 @@ kubectl patch deployment webapp -p \
 kubectl delete replicaset <problematic-rs-name>
 ```
 
-## Monitoring and Observability 📈
+## Monitoring and Observability
 
 ### Key Metrics to Watch
 
@@ -872,7 +872,7 @@ kubectl get replicasets
  **Resource limits** and PDBs protect cluster stability
  **Blue-green** and **canary** deployments minimize deployment risk
 
-## Congratulations! 🎉
+## Congratulations!
 
 You've completed the Kubernetes essentials course! You now have solid foundational knowledge of:
 
