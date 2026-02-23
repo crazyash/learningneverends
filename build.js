@@ -720,7 +720,7 @@ async function buildArticles() {
     }
     
     // Return articles without content for index page
-    return articles.map(({ title, slug, date, excerpt, folder }) => ({ title, slug, date, excerpt, folder }));
+    return articles.map(({ title, slug, date, excerpt, folder, tags }) => ({ title, slug, date, excerpt, folder, tags }));
 }
 
 function updateIndex(articles) {

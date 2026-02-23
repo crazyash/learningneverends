@@ -78,8 +78,59 @@
             font-size: 2.25rem;
             font-weight: 700;
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
             color: var(--text);
+        }
+
+        /* SEARCH FUNCTIONALITY */
+        .search-section {
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            background: var(--card-bg);
+            color: var(--text);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-light);
+        }
+
+        .search-results-count {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-top: 0.75rem;
+            font-weight: 500;
+        }
+
+        .no-results {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 1.1rem;
+            padding: 3rem 2rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin: 2rem 0;
         }
 
         .articles-grid {
@@ -137,6 +188,7 @@
             font-size: clamp(0.85rem, 2.5vw, 0.95rem);
             line-height: 1.5;
             flex: 1;
+            margin-bottom: 1rem;
         }
 
         /* THEME TOGGLE */
@@ -189,6 +241,10 @@
                 padding: 2rem 0;
             }
             
+            .search-container {
+                margin-bottom: 2.5rem;
+            }
+            
             .header {
                 padding: 1.05rem 0 0.7rem 0;
             }
@@ -224,6 +280,19 @@
             
             .articles-section {
                 padding: 1.5rem 0;
+            }
+            
+            .search-container {
+                margin-bottom: 2rem;
+            }
+            
+            .search-input {
+                font-size: 0.9rem;
+                padding: 0.75rem;
+            }
+            
+            .search-results-count {
+                font-size: 0.8rem;
             }
             
             .article-card {
@@ -313,7 +382,12 @@
     <!-- ARTICLES -->
     <section class="articles-section">
         <div class="container">
-            <h2 class="section-title">Recent Posts</h2>
+            <div class="search-section">
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search Articles..." class="search-input">
+                    <div class="search-results-count" id="searchCount"></div>
+                </div>
+            </div>
             <div id="articles" class="articles-grid"></div>
         </div>
     </section>
@@ -325,119 +399,229 @@
     "slug": "azure-apimanagement/01-Token-Caching-Strategy",
     "date": "2026-02-23T00:00:00.000Z",
     "excerpt": "Learn how to eliminate token refresh bottlenecks and reduce identity provider calls by 90% using Azure API Management's caching strategies.",
-    "folder": "azure-apimanagement"
+    "folder": "azure-apimanagement",
+    "tags": [
+      "Azure",
+      "API Management",
+      "OAuth",
+      "Performance",
+      "Caching",
+      "Authentication"
+    ]
   },
   {
     "title": "Introduction to Kubernetes",
     "slug": "kubernetes/01-Introduction-to-Kubernetes",
     "date": "2026-02-17T00:00:00.000Z",
     "excerpt": "Master Kubernetes fundamentals, architecture, and core concepts to orchestrate containerized applications at scale.",
-    "folder": "kubernetes"
+    "folder": "kubernetes",
+    "tags": [
+      "kubernetes",
+      "containers",
+      "orchestration",
+      "devops",
+      "beginner"
+    ]
   },
   {
     "title": "Installing Kubernetes",
     "slug": "kubernetes/02-Installing-Kubernetes",
     "date": "2026-02-17T00:00:00.000Z",
     "excerpt": "Complete guide to installing Kubernetes using multiple methods including minikube, kubeadm, and managed services with verification steps.",
-    "folder": "kubernetes"
+    "folder": "kubernetes",
+    "tags": [
+      "kubernetes",
+      "installation",
+      "minikube",
+      "kubeadm",
+      "setup"
+    ]
   },
   {
     "title": "Pods and Deployments",
     "slug": "kubernetes/03-Pods-and-Deployments",
     "date": "2026-02-17T00:00:00.000Z",
     "excerpt": "Master Kubernetes Pods and Deployments - the fundamental building blocks for running and managing containerized applications at scale.",
-    "folder": "kubernetes"
+    "folder": "kubernetes",
+    "tags": [
+      "kubernetes",
+      "pods",
+      "deployments",
+      "containers",
+      "scaling"
+    ]
   },
   {
     "title": "Services and Networking",
     "slug": "kubernetes/04-Services-and-Networking",
     "date": "2026-02-17T00:00:00.000Z",
     "excerpt": "Master Kubernetes Services and networking concepts including service types, load balancing, and service discovery for robust application communication.",
-    "folder": "kubernetes"
+    "folder": "kubernetes",
+    "tags": [
+      "kubernetes",
+      "services",
+      "networking",
+      "loadbalancer",
+      "dns"
+    ]
   },
   {
     "title": "ConfigMaps and Secrets",
     "slug": "kubernetes/05-ConfigMaps-and-Secrets",
     "date": "2026-02-17T00:00:00.000Z",
     "excerpt": "Master Kubernetes ConfigMaps and Secrets for secure and flexible application configuration management across different environments.",
-    "folder": "kubernetes"
+    "folder": "kubernetes",
+    "tags": [
+      "kubernetes",
+      "configmaps",
+      "secrets",
+      "configuration",
+      "security"
+    ]
   },
   {
     "title": "Scaling and Rolling Updates",
     "slug": "kubernetes/06-Scaling-and-Rolling-Updates",
     "date": "2026-02-17T00:00:00.000Z",
     "excerpt": "Master Kubernetes scaling strategies and rolling updates for zero-downtime deployments, auto-scaling, and efficient resource management.",
-    "folder": "kubernetes"
+    "folder": "kubernetes",
+    "tags": [
+      "kubernetes",
+      "scaling",
+      "rolling-updates",
+      "autoscaling",
+      "deployment"
+    ]
   },
   {
     "title": "What is Docker?",
     "slug": "docker-beginner/01-what-is-docker",
     "date": "2026-02-14T00:00:00.000Z",
     "excerpt": "Understand Docker fundamentals, containers vs VMs, and why Docker revolutionizes application deployment.",
-    "folder": "docker-beginner"
+    "folder": "docker-beginner",
+    "tags": [
+      "docker",
+      "containers",
+      "beginner",
+      "devops"
+    ]
   },
   {
     "title": "Installing Docker Desktop",
     "slug": "docker-beginner/02-installing-docker-desktop",
     "date": "2026-02-14T00:00:00.000Z",
     "excerpt": "Complete installation guide for Docker Desktop on macOS, Windows, and Linux with verification steps.",
-    "folder": "docker-beginner"
+    "folder": "docker-beginner",
+    "tags": [
+      "docker",
+      "installation",
+      "setup",
+      "beginner"
+    ]
   },
   {
     "title": "Docker Images and Containers Explained",
     "slug": "docker-beginner/03-docker-images-and-containers",
     "date": "2026-02-14T00:00:00.000Z",
     "excerpt": "Master the fundamental concepts of Docker images and containers with practical examples and clear explanations.",
-    "folder": "docker-beginner"
+    "folder": "docker-beginner",
+    "tags": [
+      "docker",
+      "images",
+      "containers",
+      "fundamentals"
+    ]
   },
   {
     "title": "Running Your First Web Server",
     "slug": "docker-beginner/04-running-your-first-web-server",
     "date": "2026-02-14T00:00:00.000Z",
     "excerpt": "Deploy and customize your first NGINX web server with Docker, including port mapping and custom content.",
-    "folder": "docker-beginner"
+    "folder": "docker-beginner",
+    "tags": [
+      "docker",
+      "nginx",
+      "web-server",
+      "deployment"
+    ]
   },
   {
     "title": "Building Images with Dockerfile",
     "slug": "docker-beginner/05-building-images-with-dockerfile",
     "date": "2026-02-14T00:00:00.000Z",
     "excerpt": "Master creating custom Docker images with Dockerfile - from basics to optimization techniques and best practices.",
-    "folder": "docker-beginner"
+    "folder": "docker-beginner",
+    "tags": [
+      "docker",
+      "dockerfile",
+      "image-building",
+      "containerization"
+    ]
   },
   {
     "title": "Managing Docker Containers",
     "slug": "docker-beginner/06-managing-containers",
     "date": "2026-02-14T00:00:00.000Z",
     "excerpt": "Master essential Docker container management commands for lifecycle control, monitoring, and troubleshooting.",
-    "folder": "docker-beginner"
+    "folder": "docker-beginner",
+    "tags": [
+      "docker",
+      "containers",
+      "management",
+      "lifecycle"
+    ]
   },
   {
     "title": "Persistent Data with Docker Volumes",
     "slug": "docker-beginner/07-docker-volumes",
     "date": "2026-02-14T00:00:00.000Z",
     "excerpt": "Master Docker volumes for persistent data storage, including types, management, and real-world use cases.",
-    "folder": "docker-beginner"
+    "folder": "docker-beginner",
+    "tags": [
+      "docker",
+      "volumes",
+      "persistence",
+      "storage"
+    ]
   },
   {
     "title": "Docker Networking Basics",
     "slug": "docker-beginner/08-docker-networking",
     "date": "2026-02-14T00:00:00.000Z",
     "excerpt": "Understand Docker networking fundamentals, network types, and container communication patterns.",
-    "folder": "docker-beginner"
+    "folder": "docker-beginner",
+    "tags": [
+      "docker",
+      "networking",
+      "communication",
+      "containers"
+    ]
   },
   {
     "title": "Docker Compose for Multi-Container Apps",
     "slug": "docker-beginner/09-docker-compose",
     "date": "2026-02-14T00:00:00.000Z",
     "excerpt": "Master Docker Compose to orchestrate complex multi-container applications with ease and efficiency.",
-    "folder": "docker-beginner"
+    "folder": "docker-beginner",
+    "tags": [
+      "docker",
+      "compose",
+      "orchestration",
+      "multi-container"
+    ]
   },
   {
     "title": "Docker Best Practices",
     "slug": "docker-beginner/10-docker-best-practices",
     "date": "2026-02-14T00:00:00.000Z",
     "excerpt": "Master production-ready Docker practices for security, performance, and maintainability in enterprise environments.",
-    "folder": "docker-beginner"
+    "folder": "docker-beginner",
+    "tags": [
+      "docker",
+      "best-practices",
+      "security",
+      "production"
+    ]
   }
 ];
 
@@ -469,15 +653,33 @@
             });
         }
 
-        function renderArticles() {
+        function renderArticles(filteredArticles = null) {
             const container = document.getElementById('articles');
+            const searchCount = document.getElementById('searchCount');
+            const articlesToShow = filteredArticles || articles;
+            
             if (!articles.length) {
                 container.innerHTML = '<div class="no-articles">No articles yet. Add .md files to articles/ and run <code>npm run build</code></div>';
+                searchCount.textContent = '';
                 return;
             }
 
+            if (filteredArticles && filteredArticles.length === 0) {
+                container.innerHTML = '<div class="no-results">No articles found matching your search. Try different keywords.</div>';
+                searchCount.textContent = 'No results found';
+                return;
+            }
+
+            // Update search results count
+            if (filteredArticles) {
+                const count = filteredArticles.length;
+                searchCount.textContent = `${count} article${count === 1 ? '' : 's'} found`;
+            } else {
+                searchCount.textContent = `Showing all ${articles.length} articles`;
+            }
+
             // ✅ CLIENT-SIDE SORT BACKUP: newest first
-            const sortedArticles = articles
+            const sortedArticles = articlesToShow
                 .map(article => ({ ...article, dateObj: new Date(article.date) }))
                 .sort((a, b) => b.dateObj - a.dateObj)
                 .map(({ dateObj, ...article }) => article);
@@ -493,9 +695,46 @@
             `).join('');
         }
 
+        function searchArticles(query) {
+            if (!query.trim()) {
+                renderArticles();
+                return;
+            }
+
+            const searchTerm = query.toLowerCase();
+            const filtered = articles.filter(article => {
+                // Search in title
+                const titleMatch = article.title.toLowerCase().includes(searchTerm);
+                
+                // Search in tags if they exist
+                const tagsMatch = article.tags ? 
+                    article.tags.some(tag => tag.toLowerCase().includes(searchTerm)) : false;
+                
+                // Search in excerpt
+                const excerptMatch = article.excerpt.toLowerCase().includes(searchTerm);
+                
+                return titleMatch || tagsMatch || excerptMatch;
+            });
+
+            renderArticles(filtered);
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchArticles(e.target.value);
+                }, 300); // Debounce search for 300ms
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();
             renderArticles();
+            setupSearch();
         });
     </script>
 
