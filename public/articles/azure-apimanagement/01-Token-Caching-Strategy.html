@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Introduction to Kubernetes - Learning Never Ends</title>
+    <title>Token Caching Strategy in Azure API Management - Learning Never Ends</title>
     <style>
         
         :root {
@@ -424,16 +424,11 @@
 
     
         <nav class="article-navigation">
+            <div></div>
             
-            <a href="../azure-apimanagement/01-Token-Caching-Strategy.html" class="nav-link prev">
-                <div class="nav-label">← Previous</div>
-                <div class="nav-title">Token Caching Strategy in Azure API Management</div>
-            </a>
-            
-            
-            <a href="02-Installing-Kubernetes.html" class="nav-link next">
+            <a href="../kubernetes/01-Introduction-to-Kubernetes.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">Installing Kubernetes</div>
+                <div class="nav-title">Introduction to Kubernetes</div>
             </a>
             
         </nav>
@@ -441,229 +436,90 @@
 
     <main class="article-content">
         <article class="article-post">
-            <h1>Introduction to Kubernetes</h1>
-<p><em>February 17, 2026</em></p>
-<div class="article-excerpt-display"><em>Master Kubernetes fundamentals, architecture, and core concepts to orchestrate containerized applications at scale.</em></div>
+            <h1>Token Caching Strategy in Azure API Management</h1>
+<p><em>February 23, 2026</em></p>
+<div class="article-excerpt-display"><em>Learn how to eliminate token refresh bottlenecks and reduce identity provider calls by 90% using Azure API Management's caching strategies.</em></div>
 
-<div class="article-tags"><span class="tag">#kubernetes</span><span class="tag">#containers</span><span class="tag">#orchestration</span><span class="tag">#devops</span><span class="tag">#beginner</span></div>
+<div class="article-tags"><span class="tag">#Azure</span><span class="tag">#API Management</span><span class="tag">#OAuth</span><span class="tag">#Performance</span><span class="tag">#Caching</span><span class="tag">#Authentication</span></div>
 
-<p>Ready to take your containerization skills to the next level? <strong>Kubernetes</strong> is the industry-standard platform for container orchestration that powers applications at companies like Google, Netflix, and Airbnb.</p>
-<h2>What is Kubernetes?</h2>
-<p><strong>Kubernetes</strong> (also called K8s) is an open-source container orchestration platform that automates the deployment, scaling, and management of containerized applications across clusters of machines.</p>
-<p>Think of it as an <strong>intelligent traffic controller</strong> for your containers, ensuring they run smoothly, recover from failures, and scale based on demand.</p>
-<h2>Why Do You Need Kubernetes?</h2>
-<h3>The Container Challenge</h3>
-<p>While Docker solved application packaging, managing hundreds or thousands of containers across multiple servers creates new challenges:</p>
+<h2>The Problem Most Developers Face</h2>
+<p>Your microservices architecture has 15 different services, each making 100 requests per minute to downstream APIs. Every single request triggers a fresh token fetch from your identity provider. That&#39;s 1,500 token requests per minute, hitting your OAuth endpoint like a DDoS attack.</p>
+<p>Most developers treat token acquisition as a necessary evil, scattered across every service. The result? Cascading failures, rate limiting nightmares, and infrastructure costs that spiral out of control.</p>
+<h2>The Gateway-First Solution</h2>
+<p>Smart developers centralize token management at the API gateway level. Azure API Management becomes your token orchestration layer, handling all the complexity while your services remain blissfully unaware.</p>
+<h2>Core Benefits</h2>
+<p><strong>Performance Improvements</strong>:</p>
 <ul>
-<li><strong>Manual Management</strong>: Manually starting/stopping containers becomes impossible at scale</li>
-<li><strong>Health Monitoring</strong>: Who watches when containers fail and restarts them?</li>
-<li><strong>Load Distribution</strong>: How do you distribute traffic across multiple container instances?</li>
-<li><strong>Scaling</strong>: How do you automatically add more containers during high traffic?</li>
-<li><strong>Configuration Management</strong>: How do you securely manage secrets and configurations?</li>
+<li>Reduce identity provider calls by 90%</li>
+<li>Sub-100ms token retrieval</li>
+<li>Eliminate token refresh bottlenecks</li>
+<li>Survive auth service outages gracefully</li>
 </ul>
-<h3>The Kubernetes Solution</h3>
-<p>Kubernetes addresses these challenges with:</p>
+<h2>Production-Ready Implementation</h2>
+<pre><code class="language-xml">&lt;inbound&gt;
+    &lt;!-- Define client identification --&gt;
+    &lt;set-variable name=&quot;client-id&quot; value=&quot;my-backend-service-client&quot; /&gt;
+    
+    &lt;!-- Check if we have a cached backend token --&gt;
+    &lt;cache-lookup-value key=&quot;@((string)context.Variables[&quot;client-id&quot;])&quot; variable-name=&quot;access-token&quot; /&gt;
+    
+    &lt;!-- If no cached token, get a fresh one --&gt;
+    &lt;choose&gt;
+        &lt;when condition=&quot;@(context.Variables.ContainsKey(&quot;access-token&quot;) == false)&quot;&gt;
+            &lt;send-request mode=&quot;new&quot; response-variable-name=&quot;token-response&quot; timeout=&quot;10&quot; ignore-error=&quot;false&quot;&gt;
+                &lt;set-url&gt;https://login.microsoftonline.com/{{tenant-id}}/oauth2/v2.0/token&lt;/set-url&gt;
+                &lt;set-method&gt;POST&lt;/set-method&gt;
+                &lt;set-header name=&quot;Content-Type&quot; exists-action=&quot;override&quot;&gt;
+                    &lt;value&gt;application/x-www-form-urlencoded&lt;/value&gt;
+                &lt;/set-header&gt;
+                &lt;set-body&gt;@{
+                    return &quot;grant_type=client_credentials&quot; +
+                           &quot;&amp;client_id={{backend-client-id}}&quot; + 
+                           &quot;&amp;client_secret={{backend-client-secret}}&quot; +
+                           &quot;&amp;scope=https://api.downstream.com/.default&quot;;
+                }&lt;/set-body&gt;
+            &lt;/send-request&gt;
+            
+            &lt;!-- Extract and cache the token --&gt;
+            &lt;set-variable name=&quot;access-token&quot; value=&quot;@{
+                var response = ((IResponse)context.Variables[&quot;token-response&quot;]).Body.As&lt;JObject&gt;();
+                return response[&quot;access_token&quot;].ToString();
+            }&quot; /&gt;
+            
+            &lt;!-- Cache for 55 minutes (tokens typically expire in 60) --&gt;
+            &lt;cache-store-value key=&quot;@((string)context.Variables[&quot;client-id&quot;])&quot; value=&quot;@((string)context.Variables[&quot;access-token&quot;])&quot; duration=&quot;3300&quot; /&gt;
+        &lt;/when&gt;
+    &lt;/choose&gt;
+    
+    &lt;!-- Use the token for backend calls --&gt;
+    &lt;set-header name=&quot;Authorization&quot; exists-action=&quot;override&quot;&gt;
+        &lt;value&gt;@(&quot;Bearer &quot; + (string)context.Variables[&quot;access-token&quot;])&lt;/value&gt;
+    &lt;/set-header&gt;
+&lt;/inbound&gt;
+</code></pre>
+<h2>Best Practices</h2>
 <ul>
-<li><strong>Automated Deployment</strong>: Deploy applications across multiple nodes automatically</li>
-<li><strong>Self-Healing</strong>: Automatically restarts failed containers and replaces unhealthy nodes</li>
-<li><strong>Horizontal Scaling</strong>: Automatically scale applications up/down based on CPU, memory, or custom metrics</li>
-<li><strong>Service Discovery</strong>: Built-in load balancing and service discovery</li>
-<li><strong>Rolling Updates</strong>: Deploy new versions with zero downtime</li>
-<li><strong>Configuration Management</strong>: Secure handling of secrets, configs, and environment variables</li>
+<li><strong>Store sensitive values in Named Values</strong> - Never hardcode client secrets</li>
+<li><strong>Use appropriate cache durations</strong> - 90% of token lifetime for security</li>
+<li><strong>Set proper timeouts</strong> - Don&#39;t let slow identity providers block your API</li>
+<li><strong>Monitor cache hit ratios</strong> - Aim for 95%+ in production</li>
+<li><strong>Implement error handling</strong> - Handle authentication failures gracefully</li>
 </ul>
-<h2>Kubernetes Architecture</h2>
-<div class="plantuml-diagram">
-                <img src="http://www.plantuml.com/plantuml/svg/dL9DJuD04BtlhnZnt0COaXwCQQMGcAeGQjAZsR9Z9OLTihiOZUb_Dq1P2jZwSHlUnsJsyMPAKwdBF2CN35zIZl0mNptvyRCNteSnNFfsu0Q-8TTXlEp8uCft0zUGKRWmjcdW-bD22fhiw1R1MfORb1mrAl2oKccK5dmI860Kdk1QYWoYZ7AqW2f86gIeW4gSYBmG7Ba6QnxTmGhbMxM6Ag15gkgltlKz1-g4rTfgE2rR9Q_8okomLxLVfms7isiDvNHxS2P7SC-wxprwBUGE9JmAXc3NHYuOseFNLk5bg6j-rynsxrUCr9D2YlUFsb1FP-JL0sZAKK9SSftcJVQocOS-StWac6hM2wQ6zqQ2mRnbQTUBaUYs5MsEHVjpAJac9UVdb9o_fUJyCoNdLoavtwJajMno9gL5AsAZbFQ4TDs_dankwdeFCLFZ8T6rTBIdxTa9t274DB62sxuGa_mHwX0oGyxAFFi2" alt="PlantUML Diagram" style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; margin: 1rem 0;" />
-            </div><h3>Control Plane Components</h3>
-<p>The <strong>Control Plane</strong> is the brain of Kubernetes that makes global decisions about the cluster:</p>
-<table>
-<thead>
-<tr>
-<th>Component</th>
-<th>Purpose</th>
-<th>Real-World Analogy</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>API Server</strong></td>
-<td>Central communication hub for all cluster operations</td>
-<td>Air traffic control tower</td>
-</tr>
-<tr>
-<td><strong>etcd</strong></td>
-<td>Distributed database storing all cluster state and configuration</td>
-<td>Flight record database</td>
-</tr>
-<tr>
-<td><strong>Scheduler</strong></td>
-<td>Decides which worker node should run each new pod</td>
-<td>Gate assignment coordinator</td>
-</tr>
-<tr>
-<td><strong>Controller Manager</strong></td>
-<td>Runs controllers that handle routine tasks (replication, endpoints, etc.)</td>
-<td>Airport maintenance crew</td>
-</tr>
-</tbody></table>
-<h3>Worker Node Components</h3>
-<p><strong>Worker Nodes</strong> are the machines that run your application containers:</p>
-<table>
-<thead>
-<tr>
-<th>Component</th>
-<th>Purpose</th>
-<th>Real-World Analogy</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>Kubelet</strong></td>
-<td>Agent that communicates with control plane and manages pods</td>
-<td>Ground crew chief</td>
-</tr>
-<tr>
-<td><strong>Kube-proxy</strong></td>
-<td>Network proxy that handles load balancing for services</td>
-<td>Baggage routing system</td>
-</tr>
-<tr>
-<td><strong>Container Runtime</strong></td>
-<td>Software that runs containers (Docker, containerd, etc.)</td>
-<td>Aircraft engines</td>
-</tr>
-<tr>
-<td><strong>Pods</strong></td>
-<td>Smallest deployable units that contain one or more containers</td>
-<td>Individual flights</td>
-</tr>
-</tbody></table>
-<h2>Key Kubernetes Concepts</h2>
-<h3><strong>Pod</strong></h3>
-<ul>
-<li>Smallest deployable unit in Kubernetes</li>
-<li>Contains one or more tightly coupled containers</li>
-<li>Shares network and storage within the pod</li>
-<li>Usually contains just one main application container</li>
-</ul>
-<h3><strong>Deployment</strong></h3>
-<ul>
-<li>Manages multiple replicas of pods</li>
-<li>Handles rolling updates and rollbacks</li>
-<li>Ensures desired number of pods are always running</li>
-</ul>
-<h3><strong>Service</strong></h3>
-<ul>
-<li>Provides stable network access to pods</li>
-<li>Load balances traffic across multiple pods</li>
-<li>Remains constant even as pods come and go</li>
-</ul>
-<h3><strong>ConfigMap &amp; Secret</strong></h3>
-<ul>
-<li><strong>ConfigMap</strong>: Stores non-sensitive configuration data</li>
-<li><strong>Secret</strong>: Stores sensitive data like passwords, tokens, keys</li>
-</ul>
-<h2>Kubernetes vs Docker Swarm vs Traditional Deployment</h2>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>Traditional VMs</th>
-<th>Docker Swarm</th>
-<th>Kubernetes</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>Complexity</strong></td>
-<td>Low</td>
-<td>Medium</td>
-<td>High</td>
-</tr>
-<tr>
-<td><strong>Scalability</strong></td>
-<td>Manual</td>
-<td>Good</td>
-<td>Excellent</td>
-</tr>
-<tr>
-<td><strong>Self-healing</strong></td>
-<td>None</td>
-<td>Basic</td>
-<td>Advanced</td>
-</tr>
-<tr>
-<td><strong>Ecosystem</strong></td>
-<td>Limited</td>
-<td>Docker-focused</td>
-<td>Vast</td>
-</tr>
-<tr>
-<td><strong>Learning Curve</strong></td>
-<td>Gentle</td>
-<td>Moderate</td>
-<td>Steep</td>
-</tr>
-<tr>
-<td><strong>Enterprise Features</strong></td>
-<td>Basic</td>
-<td>Good</td>
-<td>Comprehensive</td>
-</tr>
-</tbody></table>
-<h2>Real-World Use Cases</h2>
-<h3><strong>Web Applications</strong></h3>
-<ul>
-<li><strong>Netflix</strong>: Runs microservices at massive scale</li>
-<li><strong>Spotify</strong>: Manages music streaming infrastructure</li>
-<li><strong>Airbnb</strong>: Handles booking and payment systems</li>
-</ul>
-<h3><strong>Data Processing</strong></h3>
-<ul>
-<li><strong>Pinterest</strong>: Processes billions of user interactions</li>
-<li><strong>Bloomberg</strong>: Real-time financial data processing</li>
-</ul>
-<h3><strong>Enterprise Applications</strong></h3>
-<ul>
-<li><strong>JPMorgan Chase</strong>: Banking applications and services</li>
-<li><strong>Walmart</strong>: E-commerce and inventory management</li>
-</ul>
-<h2>What You&#39;ll Learn in This Series</h2>
-<p>By the end of this Kubernetes course, you&#39;ll be able to:</p>
-<ol>
-<li><strong>Install and configure</strong> Kubernetes clusters</li>
-<li><strong>Deploy applications</strong> using pods, deployments, and services</li>
-<li><strong>Manage networking</strong> and service discovery</li>
-<li><strong>Handle persistent storage</strong> with volumes</li>
-<li><strong>Configure applications</strong> with ConfigMaps and Secrets</li>
-<li><strong>Implement scaling</strong> and rolling updates</li>
-<li><strong>Apply best practices</strong> for production deployments</li>
-</ol>
-<h2>Prerequisites</h2>
-<p>Before diving into Kubernetes, make sure you&#39;re comfortable with:</p>
-<ul>
-<li><strong>Docker basics</strong> - containers, images, Dockerfile</li>
-<li><strong>Linux command line</strong> - basic navigation and file operations</li>
-<li><strong>YAML syntax</strong> - Kubernetes uses YAML for configuration</li>
-<li><strong>Networking concepts</strong> - ports, DNS, load balancing</li>
-</ul>
-<h2>Next Steps</h2>
-<p>Ready to get your hands dirty? In the next article, we&#39;ll install Kubernetes and set up your first cluster. You&#39;ll learn about different installation options and get everything configured for the hands-on exercises ahead.</p>
-<hr>
-<p><em>Pro Tip: Kubernetes has a steep learning curve, but don&#39;t get overwhelmed! Start with the basics and gradually build up your knowledge. Every expert was once a beginner.</em></p>
+<h2>The Bottom Line</h2>
+<p>Most developers treat API Management as a routing layer. Smart developers leverage it as an intelligent caching and orchestration platform.</p>
+<p>By centralizing token management at the gateway level, you eliminate one of the most common sources of performance bottlenecks in microservices architectures.</p>
+<p>The question isn&#39;t whether you should implement token caching - it&#39;s whether you can afford not to.</p>
 
         </article>
     </main>
 
     
         <nav class="article-navigation">
+            <div></div>
             
-            <a href="../azure-apimanagement/01-Token-Caching-Strategy.html" class="nav-link prev">
-                <div class="nav-label">← Previous</div>
-                <div class="nav-title">Token Caching Strategy in Azure API Management</div>
-            </a>
-            
-            
-            <a href="02-Installing-Kubernetes.html" class="nav-link next">
+            <a href="../kubernetes/01-Introduction-to-Kubernetes.html" class="nav-link next">
                 <div class="nav-label">Next →</div>
-                <div class="nav-title">Installing Kubernetes</div>
+                <div class="nav-title">Introduction to Kubernetes</div>
             </a>
             
         </nav>

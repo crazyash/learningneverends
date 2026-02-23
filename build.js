@@ -641,36 +641,18 @@ async function buildArticles() {
         });
     }
     
-    // Sort articles: docker-beginner first, kubernetes second, then others by date
+    // Sort articles: Global reverse chronological order by date, then by filename
     articles.sort((a, b) => {
-        // Define folder priority order
-        const getFolderPriority = (folder) => {
-            switch(folder) {
-                case 'docker-beginner': return 1;
-                case 'kubernetes': return 2;
-                default: return 3;
-            }
-        };
+        // First priority: Sort by date (newest first for reverse chronological learning path)
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
         
-        const aPriority = getFolderPriority(a.folder);
-        const bPriority = getFolderPriority(b.folder);
-        
-        // If different folder priorities, sort by priority
-        if (aPriority !== bPriority) {
-            return aPriority - bPriority;
+        if (dateA.getTime() !== dateB.getTime()) {
+            return dateB - dateA; // Newest first (reversed)
         }
         
-        // Within the same folder, sort by order number
-        if (a.folder === b.folder) {
-            if (a.order !== b.order) {
-                return a.order - b.order;
-            }
-            // If same order, sort by date (newest first)
-            return new Date(b.date) - new Date(a.date);
-        }
-        
-        // Different folders with same priority (shouldn't happen with current logic), sort by date
-        return new Date(b.date) - new Date(a.date);
+        // If dates are equal, sort by filename (natural order)
+        return a.baseName.localeCompare(b.baseName);
     });
     
     // Second pass: generate HTML with navigation
@@ -701,79 +683,32 @@ async function buildArticles() {
         contentWithHeader += article.content.replace(/^#\s+.*$/m, '').trim();
         const htmlContent = marked(contentWithHeader);
         
-        // Determine navigation
+        // Determine navigation - Simple chronological navigation
         let navigation = null;
-        if (article.folder === 'docker-beginner') {
-            // For docker articles, navigate within the same folder sequence, but allow global navigation at boundaries
-            const dockerArticles = articles.filter(a => a.folder === 'docker-beginner');
-            const dockerIndex = dockerArticles.findIndex(a => a.slug === article.slug);
-            
-            let prev = null;
-            let next = null;
-            
-            // Previous navigation
-            if (dockerIndex > 0) {
-                // Previous Docker article
-                prev = dockerArticles[dockerIndex - 1];
-            } else {
-                // First Docker article - no previous (could link to global previous if desired)
-                prev = null;
-            }
-            
-            // Next navigation
-            if (dockerIndex < dockerArticles.length - 1) {
-                // Next Docker article
-                next = dockerArticles[dockerIndex + 1];
-            } else {
-                // Last Docker article - link to first Kubernetes article to create a complete loop
-                const kubernetesArticles = articles.filter(a => a.folder === 'kubernetes');
-                if (kubernetesArticles.length > 0) {
-                    next = kubernetesArticles[0]; // First Kubernetes article
-                } else {
-                    next = null;
-                }
-            }
-            
-            navigation = { prev, next };
-        } else if (article.folder === 'kubernetes') {
-            // For kubernetes articles, navigate within the same folder sequence, with connection to docker
-            const kubernetesArticles = articles.filter(a => a.folder === 'kubernetes');
-            const kubernetesIndex = kubernetesArticles.findIndex(a => a.slug === article.slug);
-            
-            let prev = null;
-            let next = null;
-            
-            // Previous navigation
-            if (kubernetesIndex > 0) {
-                // Previous Kubernetes article
-                prev = kubernetesArticles[kubernetesIndex - 1];
-            } else {
-                // First Kubernetes article - no previous navigation (independent sequence)
-                prev = null;
-            }
-            
-            // Next navigation
-            if (kubernetesIndex < kubernetesArticles.length - 1) {
-                // Next Kubernetes article
-                next = kubernetesArticles[kubernetesIndex + 1];
-            } else {
-                // Last Kubernetes article - loop back to first Docker article
-                const dockerArticles = articles.filter(a => a.folder === 'docker-beginner');
-                if (dockerArticles.length > 0) {
-                    next = dockerArticles[0]; // First Docker article (What is Docker?)
-                } else {
-                    next = null;
-                }
-            }
-            
-            navigation = { prev, next };
+        
+        // Find current article's position in chronological sequence
+        const globalIndex = articles.findIndex(a => a.slug === article.slug);
+        
+        let prev = null;
+        let next = null;
+        
+        // Previous navigation: previous article in reverse chronological order (newer article)
+        if (globalIndex > 0) {
+            prev = articles[globalIndex - 1];
         } else {
-            // For other articles, navigate globally in sequence order
-            navigation = {
-                prev: i > 0 ? articles[i - 1] : null, // Previous in sequence
-                next: i < articles.length - 1 ? articles[i + 1] : null // Next in sequence
-            };
+            // First article in reverse chronological (newest) - no previous navigation
+            prev = null;
         }
+        
+        // Next navigation: next article in reverse chronological order (older article)
+        if (globalIndex < articles.length - 1) {
+            next = articles[globalIndex + 1];
+        } else {
+            // Last article in reverse chronological (oldest) - link back to newest article for continuous learning
+            next = articles[0]; // First article is now the newest due to reverse sort
+        }
+        
+        navigation = { prev, next };
         
         // Calculate relative path to index.html
         const relativePath = article.folder ? '../' : '';
